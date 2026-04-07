@@ -162,13 +162,13 @@ function onMapReady(map: L.Map) {
   });
 }
 
-// Fly to user position when it first becomes available
+// Fly to user position whenever it is set or updated
 watch(
-  () => props.userLat,
-  (lat, prevLat) => {
-    if (lat != null && prevLat == null && props.userLng != null && leafletMap) {
-      leafletMap.flyTo([lat, props.userLng], 16, { duration: 1.2 });
-    }
+  () => [props.userLat, props.userLng] as const,
+  ([lat, lng], [prevLat, prevLng]) => {
+    if (lat == null || lng == null || !leafletMap) return;
+    if (lat === prevLat && lng === prevLng) return;
+    leafletMap.flyTo([lat, lng], 16, { duration: 1.2 });
   },
 );
 
