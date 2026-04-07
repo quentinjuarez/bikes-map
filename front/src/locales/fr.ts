@@ -4,12 +4,25 @@ export default {
     settings: 'Paramètres',
     gettingLocation: 'Récupération de la position…',
     nextRefresh: '↻ {n}s',
+    locateMe: 'Me localiser',
+    locating: 'Localisation…',
   },
   install: {
     title: 'Installer l’app',
     subtitle: 'Accès instantané depuis votre écran d’accueil',
     install: 'Installer',
     later: 'Plus tard',
+  },
+  onboardingModal: {
+    title: 'Bienvenue sur Bike Tracker',
+    subtitle:
+      'Tous les opérateurs parisiens sur une seule carte en temps réel.',
+    tip1: 'La carte affiche tous les véhicules Lime, Voi, Dott et Vélib disponibles, mis à jour en temps réel.',
+    tip2: 'Appuyez sur \u00ab\u00a0Me localiser\u00a0\u00bb pour centrer la carte sur votre position et afficher les distances.',
+    tip3: 'Appuyez sur un marqueur pour voir la batterie, la distance et les détails du véhicule.',
+    tip4: 'Utilisez Paramètres pour filtrer par opérateur, niveau de batterie ou distance à pied.',
+    cta: 'C\u2019est parti !',
+    close: 'Fermer',
   },
   onboarding: {
     title: 'Bike Tracker',

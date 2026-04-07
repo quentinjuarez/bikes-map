@@ -15,6 +15,7 @@
       />
 
       <l-marker
+        v-if="props.userLat != null && props.userLng != null"
         :lat-lng="[props.userLat, props.userLng]"
         :icon="
           createCircularIcon({
@@ -122,8 +123,8 @@ import { useTheme } from '../composables/useTheme';
 
 const props = defineProps<{
   bikes: MapEntity[];
-  userLat: number;
-  userLng: number;
+  userLat?: number;
+  userLng?: number;
 }>();
 
 const { theme } = useTheme();
@@ -150,8 +151,13 @@ onMounted(() => {
   });
 });
 
-const zoom = 17;
-const center = computed<[number, number]>(() => [props.userLat, props.userLng]);
+const zoom = computed(() => (props.userLat != null ? 17 : 14));
+const PARIS_LAT = 48.8566;
+const PARIS_LNG = 2.3522;
+const center = computed<[number, number]>(() => [
+  props.userLat ?? PARIS_LAT,
+  props.userLng ?? PARIS_LNG,
+]);
 
 const PROVIDER_HEX: Record<Provider, string> = {
   lime: 'var(--color-lime-brand)',

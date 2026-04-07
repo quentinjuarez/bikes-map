@@ -2,73 +2,74 @@
   <div
     class="relative w-full h-dvh overflow-hidden bg-[#fafaf9] dark:bg-[#0c0c14] flex flex-col"
   >
-    <!-- Onboarding: no position yet (and geo is loading) -->
-    <OnboardingScreen v-if="!store.hasPosition && !geoLoading" />
+    <!-- Map always visible -->
+    <BikeMap
+      :bikes="bikes"
+      :user-lat="store.lat ?? undefined"
+      :user-lng="store.lng ?? undefined"
+    />
 
-    <!-- Map (show behind loading spinner if geo is in progress on first load) -->
-    <template v-if="store.hasPosition || geoLoading">
-      <!-- <Transition name="fade">
-        <div
-          v-if="loading"
-          class="fixed inset-0 z-900 bg-black/0 backdrop-blur-sm flex items-center justify-center pointer-events-none"
+    <!-- Top-right HUD -->
+    <div class="top-4 right-4 fixed z-1000 flex items-center gap-2 flex-none">
+      <BaseButton @click="showList = true" variant="ghost" size="sm">
+        {{ t('main.list') }}
+      </BaseButton>
+      <BaseButton @click="showSettings = true" variant="ghost" size="sm">
+        {{ t('main.settings') }}
+      </BaseButton>
+      <div
+        class="min-w-16 flex justify-center items-center backdrop-blur-sm bg-accent-500/5 dark:bg-black/10 text-accent-600 dark:text-accent-400 text-xs font-mono px-3 py-1.5 rounded-xl border border-accent-200 dark:border-accent-700"
+      >
+        <SpinnerIcon v-if="loading" size="sm" />
+        <span v-if="!loading" class="flex-none">{{
+          t('main.nextRefresh', { n: nextRefresh })
+        }}</span>
+      </div>
+    </div>
+
+    <!-- Geolocation widget (bottom-right) -->
+    <div class="fixed bottom-6 right-4 z-1000">
+      <button
+        class="flex items-center gap-2 backdrop-blur-sm bg-accent-500/5 dark:bg-black/10 text-accent-600 dark:text-accent-400 text-xs font-medium px-3 py-2 rounded-xl border border-accent-200 dark:border-accent-700 shadow-sm hover:bg-accent-100/60 dark:hover:bg-white/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        :disabled="geoLoading"
+        @click="locate"
+      >
+        <SpinnerIcon v-if="geoLoading" size="sm" />
+        <svg
+          v-else
+          xmlns="http://www.w3.org/2000/svg"
+          class="w-3.5 h-3.5 flex-none"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
         >
-          <SpinnerIcon size="lg" />
-        </div>
-      </Transition> -->
-
-      <BikeMap
-        v-if="store.hasPosition"
-        :bikes="bikes"
-        :user-lat="store.lat!"
-        :user-lng="store.lng!"
-      />
-
-      <!-- Initial geo loading screen -->
+          <circle cx="12" cy="12" r="3" />
+          <path d="M12 2v3M12 19v3M2 12h3M19 12h3" />
+        </svg>
+        {{ geoLoading ? t('main.locating') : t('main.locateMe') }}
+      </button>
+      <!-- Geo error tooltip -->
       <div
-        v-if="geoLoading && !store.hasPosition"
-        class="flex items-center justify-center h-full gap-3 text-accent-600 dark:text-accent-400 text-sm"
+        v-if="geoError"
+        class="mt-1 text-red-400 text-xs bg-red-950/80 px-2 py-1 rounded-lg border border-red-800 max-w-xs text-right"
       >
-        <SpinnerIcon size="lg" />
-        <span>{{ t('main.gettingLocation') }}</span>
+        {{ geoError }}
       </div>
+    </div>
 
-      <!-- Geo error on first load (no position yet) -->
-      <div
-        v-if="geoError && !store.hasPosition"
-        class="flex flex-col items-center justify-center h-full gap-4 text-accent-600 dark:text-accent-400 px-6"
-      >
-        <p class="text-red-400 text-sm text-center">{{ geoError }}</p>
-        <OnboardingScreen />
-      </div>
-    </template>
+    <!-- API error toast -->
+    <div
+      v-if="error"
+      class="fixed top-16 right-4 z-1000 bg-red-900 text-red-400 text-xs font-mono px-3 py-2 rounded-lg shadow-lg border border-red-800 max-w-xs"
+    >
+      {{ error }}
+    </div>
 
-    <!-- HUD -->
-    <template v-if="store.hasPosition">
-      <div class="top-4 right-4 fixed z-1000 flex items-center gap-2 flex-none">
-        <BaseButton @click="showList = true" variant="ghost" size="sm">
-          {{ t('main.list') }}
-        </BaseButton>
-        <BaseButton @click="showSettings = true" variant="ghost" size="sm">
-          {{ t('main.settings') }}
-        </BaseButton>
-        <div
-          class="min-w-16 flex justify-center items-center backdrop-blur-sm bg-accent-500/5 dark:bg-black/10 text-accent-600 dark:text-accent-400 text-xs font-mono px-3 py-1.5 rounded-xl border border-accent-200 dark:border-accent-700"
-        >
-          <SpinnerIcon v-if="loading" size="sm" />
-          <span v-if="!loading" class="flex-none">{{
-            t('main.nextRefresh', { n: nextRefresh })
-          }}</span>
-        </div>
-      </div>
-
-      <!-- Error toast -->
-      <div
-        v-if="error"
-        class="fixed top-16 right-4 z-1000 bg-red-900 text-red-400 text-xs font-mono px-3 py-2 rounded-lg shadow-lg border border-red-800 max-w-xs"
-      >
-        {{ error }}
-      </div>
-    </template>
+    <!-- First-run onboarding modal -->
+    <OnboardingModal v-if="showOnboarding" @close="dismissOnboarding" />
 
     <!-- Settings -->
     <SettingsPanel :open="showSettings" @close="showSettings = false" />
@@ -85,12 +86,12 @@ import { useBikes } from '../composables/useBikes';
 import { useGeolocation } from '../composables/useGeolocation';
 import { ALL_PROVIDERS, FILTER_BOUNDS, UNSET } from '../types';
 import { applyQueryParams } from '../composables/useQueryParams';
-import OnboardingScreen from '../components/OnboardingScreen.vue';
 import BikeMap from '../components/BikeMap.vue';
 import BikeList from '../components/BikeList.vue';
 import SpinnerIcon from '../components/SpinnerIcon.vue';
 import SettingsPanel from '../components/SettingsPanel.vue';
 import BaseButton from '../components/BaseButton.vue';
+import OnboardingModal from '../components/OnboardingModal.vue';
 
 const store = useProfileStore();
 const { t } = useI18n();
@@ -99,14 +100,21 @@ const { error: geoError, loading: geoLoading, locate } = useGeolocation();
 const showList = ref(false);
 const showSettings = ref(false);
 
+const ONBOARDING_KEY = 'lt_onboarding_seen';
+const showOnboarding = ref(false);
+
+function dismissOnboarding() {
+  showOnboarding.value = false;
+  localStorage.setItem(ONBOARDING_KEY, '1');
+}
+
 onMounted(() => {
   // Query params take priority (shared link / embed-like usage on main view)
-  const hadQueryParams = applyQueryParams(window.location.search);
+  applyQueryParams(window.location.search);
 
-  // Auto-refresh geo only if the user has already set a position in geo mode
-  // (i.e. they did onboarding before). Don't trigger on first visit.
-  if (!hadQueryParams && store.locationMode === 'geo' && store.hasPosition) {
-    locate();
+  // Show first-run modal if not previously dismissed
+  if (!localStorage.getItem(ONBOARDING_KEY)) {
+    showOnboarding.value = true;
   }
 });
 

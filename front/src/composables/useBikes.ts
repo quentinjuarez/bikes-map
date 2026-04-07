@@ -122,14 +122,12 @@ export function useBikes(opts?: { proxyBase?: string }) {
     });
   }
 
-  async function fetchOnce() {
-    if (!store.hasPosition) {
-      bikes.value = [];
-      return;
-    }
+  // Paris city centre – used for distance calculations when no user position is known
+  const PARIS = { lat: 48.8566, lng: 2.3522 };
 
-    const userLat = store.lat!;
-    const userLng = store.lng!;
+  async function fetchOnce() {
+    const userLat = store.lat ?? PARIS.lat;
+    const userLng = store.lng ?? PARIS.lng;
 
     loading.value = true;
     error.value = null;
@@ -170,8 +168,12 @@ export function useBikes(opts?: { proxyBase?: string }) {
 
       let filtered = all;
 
-      // Max distance filter (-1 = unlimited), applies to all entities
-      if (store.maxDistance !== UNSET && store.maxDistance > 0) {
+      // Max distance filter – only meaningful when the user has a real position
+      if (
+        store.hasPosition &&
+        store.maxDistance !== UNSET &&
+        store.maxDistance > 0
+      ) {
         filtered = filtered.filter(
           (e) => e.distance != null && e.distance <= store.maxDistance,
         );
@@ -187,9 +189,9 @@ export function useBikes(opts?: { proxyBase?: string }) {
         );
       }
 
-      bikes.value = filtered
-        .sort((a, b) => (a.distance ?? 0) - (b.distance ?? 0))
-        .slice(0, store.limit);
+      bikes.value = filtered.sort(
+        (a, b) => (a.distance ?? 0) - (b.distance ?? 0),
+      );
     } catch (err: any) {
       console.error(err);
       error.value = err?.message ?? String(err);
@@ -207,7 +209,6 @@ export function useBikes(opts?: { proxyBase?: string }) {
 
   function scheduleNext() {
     if (stopped || !active.value) return;
-    if (!store.hasPosition) return;
     const intervalMs = store.pollInterval * 1000;
     nextRefresh.value = store.pollInterval;
     timer = setTimeout(async () => {
@@ -241,26 +242,17 @@ export function useBikes(opts?: { proxyBase?: string }) {
     nextRefresh.value = 0;
   }
 
-  // Watch for store changes → restart if ready
+  // Watch for store changes → restart polling (position change updates distance calculations)
   watch(
-    () =>
-      store.hasPosition
-        ? [
-            store.lat,
-            store.lng,
-            store.providers,
-            store.limit,
-            store.maxDistance,
-            store.minBattery,
-            store.pollInterval,
-          ]
-        : null,
-    (val) => {
-      if (!val) {
-        stopPolling();
-        return;
-      }
-      // Restart
+    () => [
+      store.lat,
+      store.lng,
+      store.providers,
+      store.maxDistance,
+      store.minBattery,
+      store.pollInterval,
+    ],
+    () => {
       stopPolling();
       startPolling();
     },
@@ -268,9 +260,7 @@ export function useBikes(opts?: { proxyBase?: string }) {
   );
 
   onMounted(() => {
-    if (store.hasPosition) {
-      startPolling();
-    }
+    startPolling();
   });
 
   onUnmounted(() => {
