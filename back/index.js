@@ -1,33 +1,68 @@
 import { createServer } from 'node:http';
+import Redis from 'ioredis';
 
 const PORT = Number(process.env.PORT ?? 13001);
 const FRONT_URL = process.env.VITE_FRONT_URL ?? '';
 
-// -- Cache ------------------------------------------------------------------
+// -- Redis cache ------------------------------------------------------------
 
-const cache = new Map();
+const SERVER_NAME = process.env.RAILWAY_SERVICE_NAME ?? 'bike-tracker-server';
 
-function setCache(key, data, ttlSeconds) {
-  cache.set(key, { data, expiresAt: Date.now() + ttlSeconds * 1000 });
+const redis = new Redis(
+  process.env.REDIS_URL ?? 'redis://redis.railway.internal:6379',
+  {
+    lazyConnect: true,
+    enableOfflineQueue: false,
+    connectTimeout: 3000,
+    maxRetriesPerRequest: 1,
+  },
+);
+
+let cacheEnabled = false;
+
+redis.on('error', (err) => {
+  if (cacheEnabled) {
+    console.warn('[redis] connection lost — cache disabled:', err.message);
+    cacheEnabled = false;
+  }
+});
+
+async function connectRedis() {
+  try {
+    await redis.connect();
+    await redis.ping();
+    cacheEnabled = true;
+    console.log('[redis] connected — cache enabled');
+  } catch (err) {
+    console.warn('[redis] unavailable — cache disabled:', err.message);
+  }
 }
 
-function getCache(key) {
-  const entry = cache.get(key);
-  if (!entry) return null;
-  if (Date.now() > entry.expiresAt) {
-    cache.delete(key);
+function cacheKey(key) {
+  return `${SERVER_NAME}:${key}`;
+}
+
+async function setCache(key, data, ttlSeconds) {
+  if (!cacheEnabled) return;
+  try {
+    await redis.set(cacheKey(key), JSON.stringify(data), 'EX', ttlSeconds);
+  } catch (err) {
+    console.warn('[redis] setCache failed:', err.message);
+    cacheEnabled = false;
+  }
+}
+
+async function getCache(key) {
+  if (!cacheEnabled) return null;
+  try {
+    const raw = await redis.get(cacheKey(key));
+    return raw ? JSON.parse(raw) : null;
+  } catch (err) {
+    console.warn('[redis] getCache failed:', err.message);
+    cacheEnabled = false;
     return null;
   }
-  return entry.data;
 }
-
-// Purge expired cache entries every minute
-setInterval(() => {
-  const now = Date.now();
-  for (const [k, v] of cache) {
-    if (now > v.expiresAt) cache.delete(k);
-  }
-}, 60_000).unref();
 
 // -- Rate limiter -----------------------------------------------------------
 
@@ -86,27 +121,26 @@ const VELIB_BASE =
 // -- Route handlers ---------------------------------------------------------
 
 async function handleFreeBikeStatus(res, provider) {
-  const cacheKey = `${provider}_bikes`;
-  const cached = getCache(cacheKey);
+  const cached = await getCache(`${provider}_bikes`);
   if (cached) return sendJson(res, 200, cached);
 
   const r = await fetch(FREE_BIKE_URLS[provider]);
   if (!r.ok) throw new Error(`upstream returned ${r.status}`);
   const data = await r.json();
-  setCache(cacheKey, data, 30);
+  await setCache(`${provider}_bikes`, data, 30);
   sendJson(res, 200, data);
 }
 
 async function handleVelibStations(res) {
-  const cached = getCache('velib_stations');
+  const cached = await getCache('velib_stations');
   if (cached) return sendJson(res, 200, cached);
 
-  let infoData = getCache('velib_info');
+  let infoData = await getCache('velib_info');
   if (!infoData) {
     const r = await fetch(`${VELIB_BASE}/station_information.json`);
     if (!r.ok) throw new Error(`velib info upstream returned ${r.status}`);
     infoData = await r.json();
-    setCache('velib_info', infoData, 3600);
+    await setCache('velib_info', infoData, 3600);
   }
 
   const statusRes = await fetch(`${VELIB_BASE}/station_status.json`);
@@ -146,7 +180,7 @@ async function handleVelibStations(res) {
   }, []);
 
   const result = { stations };
-  setCache('velib_stations', result, 30);
+  await setCache('velib_stations', result, 30);
   sendJson(res, 200, result);
 }
 
@@ -207,6 +241,7 @@ const server = createServer(async (req, res) => {
   }
 });
 
-server.listen(PORT, () =>
-  console.log(`Bike-tracker proxy running on http://localhost:${PORT}`),
-);
+server.listen(PORT, async () => {
+  console.log(`Bike-tracker proxy running on http://localhost:${PORT}`);
+  await connectRedis();
+});

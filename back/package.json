@@ -10,5 +10,8 @@
   "devDependencies": {
     "nodemon": "^3.1.11"
   },
-  "packageManager": "yarn@3.8.6"
+  "packageManager": "yarn@3.8.6",
+  "dependencies": {
+    "ioredis": "^5.10.1"
+  }
 }
