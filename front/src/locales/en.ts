@@ -159,11 +159,13 @@ export default {
     },
   },
   geo: {
-    enterManually: 'Enter location manually',
+    enterManually: 'Set location manually',
     cancel: 'Cancel',
-    placeholder: 'Coordinates or Google Maps link…',
-    cannotParse: 'Could not parse location',
-    confirm: 'Confirm location',
+    placeholder: '48.8566, 2.3522 or Google Maps link…',
+    cannotParse: 'Could not recognise this location',
+    confirm: 'Set',
+    helperText:
+      'Paste coordinates (48.8566, 2.3522), a decimal pair or a Google Maps link.',
   },
   settings: {
     title: 'Settings',

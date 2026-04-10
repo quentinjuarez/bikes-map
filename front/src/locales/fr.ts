@@ -160,11 +160,13 @@ export default {
     },
   },
   geo: {
-    enterManually: 'Saisir manuellement',
+    enterManually: 'Définir manuellement',
     cancel: 'Annuler',
-    placeholder: 'Coordonnées ou lien Google Maps…',
-    cannotParse: 'Impossible de lire la position',
-    confirm: 'Confirmer la position',
+    placeholder: '48.8566, 2.3522 ou lien Google Maps…',
+    cannotParse: 'Impossible de lire cette position',
+    confirm: 'Valider',
+    helperText:
+      'Collez des coordonnées (48.8566, 2.3522) ou un lien Google Maps.',
   },
   settings: {
     title: 'Paramètres',

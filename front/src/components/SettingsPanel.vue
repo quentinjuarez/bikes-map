@@ -168,44 +168,76 @@
             <!-- Geo error -->
             <p v-if="geoError" class="text-xs text-red-400">{{ geoError }}</p>
 
-            <!-- Manual input toggle -->
-            <button
-              class="text-xs text-accent-400 dark:text-accent-500 hover:text-accent-600 dark:hover:text-accent-300 transition-colors"
-              @click="showManualInput = !showManualInput"
-            >
-              {{ showManualInput ? t('geo.cancel') : t('geo.enterManually') }}
-            </button>
+            <!-- Manual location -->
+            <div class="space-y-2 pt-1">
+              <p class="text-xs text-accent-500 dark:text-accent-400">
+                {{ t('geo.enterManually') }}
+              </p>
 
-            <template v-if="showManualInput">
-              <BaseInput
-                v-model="locationRaw"
-                type="text"
-                :placeholder="t('geo.placeholder')"
-                class="text-xs"
-                @keydown.enter="submitManual"
-              />
+              <!-- Input + confirm in a row -->
+              <div class="flex gap-2">
+                <BaseInput
+                  v-model="locationRaw"
+                  size="sm"
+                  type="text"
+                  :placeholder="t('geo.placeholder')"
+                  class="flex-1 min-w-0"
+                  @keydown.enter="submitManual"
+                />
+                <button
+                  class="shrink-0 text-xs font-medium px-3 py-1.5 rounded-xl bg-accent-500 text-white disabled:opacity-40 disabled:cursor-not-allowed hover:bg-accent-600 transition-colors"
+                  :disabled="!parsedLocation"
+                  @click="submitManual"
+                >
+                  {{ t('geo.confirm') }}
+                </button>
+              </div>
+
+              <!-- Live feedback -->
               <div
                 v-if="locationRaw && parsedLocation"
-                class="text-[11px] text-green-400"
+                class="flex items-center gap-1.5 text-[11px] text-green-500 dark:text-green-400"
               >
-                ✓ {{ parsedLocation.lat.toFixed(5) }},
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="w-3 h-3 flex-none"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+                {{ parsedLocation.lat.toFixed(5) }},
                 {{ parsedLocation.lng.toFixed(5) }}
               </div>
               <div
                 v-else-if="locationRaw && !parsedLocation"
-                class="text-[11px] text-red-400"
+                class="flex items-center gap-1.5 text-[11px] text-red-400"
               >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="w-3 h-3 flex-none"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
                 {{ t('geo.cannotParse') }}
               </div>
-              <BaseButton
-                variant="ghost"
-                size="sm"
-                :disabled="!parsedLocation"
-                @click="submitManual"
+              <p
+                class="text-[10px] text-accent-400 dark:text-accent-600 leading-relaxed"
               >
-                {{ t('geo.confirm') }}
-              </BaseButton>
-            </template>
+                {{ t('geo.helperText') }}
+              </p>
+            </div>
           </section>
 
           <!-- Reset -->
@@ -264,7 +296,6 @@ const { t } = useI18n();
 const { error: geoError, loading: geoLoading, locate } = useGeolocation();
 
 // ── Manual location input ────────────────────────────────────────────
-const showManualInput = ref(false);
 const locationRaw = ref('');
 const parsedLocation = computed(() => parseLocation(locationRaw.value));
 
@@ -276,7 +307,6 @@ function submitManual() {
     'manual',
   );
   locationRaw.value = '';
-  showManualInput.value = false;
 }
 
 // ── Providers list ───────────────────────────────────────────────────
@@ -312,7 +342,6 @@ watch(
     if (open) {
       Object.assign(draft, draftFromStore());
     } else {
-      showManualInput.value = false;
       locationRaw.value = '';
     }
   },

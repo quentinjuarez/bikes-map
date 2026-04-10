@@ -163,12 +163,26 @@ function onMapReady(map: L.Map) {
 }
 
 // Fly to user position whenever it is set or updated
+// Also pre-seed mapBounds immediately so displayEntities shows bikes
+// around the new position before the flyTo animation completes.
+const Z16_PAD_LAT = 0.018; // ~2 km — covers any z16 viewport
+const Z16_PAD_LNG = 0.022;
+
 watch(
   () => [props.userLat, props.userLng] as const,
   ([lat, lng], [prevLat, prevLng]) => {
-    if (lat == null || lng == null || !leafletMap) return;
+    if (lat == null || lng == null) return;
     if (lat === prevLat && lng === prevLng) return;
-    leafletMap.flyTo([lat, lng], 16, { duration: 1.2 });
+    // Pre-set bounds so displayEntities includes bikes near new position
+    mapBounds.value = {
+      n: lat + Z16_PAD_LAT,
+      s: lat - Z16_PAD_LAT,
+      e: lng + Z16_PAD_LNG,
+      w: lng - Z16_PAD_LNG,
+    };
+    if (leafletMap) {
+      leafletMap.flyTo([lat, lng], 16, { duration: 1.2 });
+    }
   },
 );
 
