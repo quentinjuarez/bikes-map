@@ -2,7 +2,11 @@ import { createServer } from 'node:http';
 import Redis from 'ioredis';
 
 const PORT = Number(process.env.PORT ?? 13001);
-const FRONT_URL = process.env.VITE_FRONT_URL ?? '';
+const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(',')
+      .map((o) => o.trim())
+      .filter(Boolean)
+  : [];
 
 // -- Redis cache ------------------------------------------------------------
 
@@ -90,8 +94,8 @@ setInterval(() => {
 
 function getAllowedOrigin(origin) {
   if (!origin) return null; // no browser origin (curl/server) -> OK, skip CORS header
-  if (!FRONT_URL) return origin; // dev: allow all
-  if (origin === FRONT_URL) return origin;
+  if (ALLOWED_ORIGINS.length === 0) return origin; // dev: allow all
+  if (ALLOWED_ORIGINS.includes(origin)) return origin;
   return false; // rejected
 }
 
