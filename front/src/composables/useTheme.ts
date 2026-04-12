@@ -7,7 +7,9 @@ const STORAGE_KEY = 'lime-tracker-theme';
 function getInitialTheme(): Theme {
   const stored = localStorage.getItem(STORAGE_KEY) as Theme | null;
   if (stored === 'light' || stored === 'dark') return stored;
-  return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+  return window.matchMedia('(prefers-color-scheme: light)').matches
+    ? 'light'
+    : 'dark';
 }
 
 function onKeyDown(e: KeyboardEvent) {
@@ -17,7 +19,7 @@ function onKeyDown(e: KeyboardEvent) {
   }
 }
 
-const theme = ref<Theme>(getInitialTheme());
+export const theme = ref<Theme>(getInitialTheme());
 
 function applyTheme(t: Theme) {
   const html = document.documentElement;

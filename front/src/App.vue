@@ -1,16 +1,19 @@
 <template>
   <RouterView />
-  <InstallBanner />
+  <InstallBanner v-if="!isEmbed" />
 </template>
 
 <script setup lang="ts">
-import { onErrorCaptured } from 'vue';
-import { RouterView } from 'vue-router';
+import { computed, onErrorCaptured } from 'vue';
+import { RouterView, useRoute } from 'vue-router';
 
 import InstallBanner from './components/InstallBanner.vue';
 import { useTheme } from './composables/useTheme';
 
 useTheme();
+
+const route = useRoute();
+const isEmbed = computed(() => route.meta.embed === true);
 
 // Global error boundary — catch Vue render/watcher errors so the app
 // doesn't blank out. Errors are suppressed after logging; the next

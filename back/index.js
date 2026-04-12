@@ -8,15 +8,12 @@ const FRONT_URL = process.env.VITE_FRONT_URL ?? '';
 
 const SERVER_NAME = process.env.RAILWAY_SERVICE_NAME ?? 'bike-tracker-server';
 
-const redis = new Redis(
-  process.env.REDIS_URL ?? 'redis://redis.railway.internal:6379',
-  {
-    lazyConnect: true,
-    enableOfflineQueue: false,
-    connectTimeout: 3000,
-    maxRetriesPerRequest: 1,
-  },
-);
+const redis = new Redis(process.env.REDIS_URL, {
+  lazyConnect: true,
+  enableOfflineQueue: false,
+  connectTimeout: 3000,
+  maxRetriesPerRequest: 1,
+});
 
 let cacheEnabled = false;
 
@@ -124,9 +121,9 @@ const VELIB_BASE =
 // provider only gives current_range_meters instead of current_fuel_percent.
 const MAX_RANGE = {
   // Lime
-  '1': 24140,
-  '2': 40233,
-  '3': 85000,
+  1: 24140,
+  2: 40233,
+  3: 85000,
   // Voi
   voi_scooter: 80000,
   voi_bike: 80000,
@@ -144,7 +141,10 @@ function computeBattery(b) {
   }
   const maxRange = b.vehicle_type_id ? MAX_RANGE[b.vehicle_type_id] : undefined;
   if (b.current_range_meters != null && maxRange) {
-    return Math.min(100, Math.round((Number(b.current_range_meters) / maxRange) * 100));
+    return Math.min(
+      100,
+      Math.round((Number(b.current_range_meters) / maxRange) * 100),
+    );
   }
   return null;
 }

@@ -1,5 +1,6 @@
 import { useProfileStore } from '../stores/profile';
 import { type Provider, ALL_PROVIDERS, UNSET } from '../types';
+import { theme, type Theme } from './useTheme';
 
 /**
  * Reads lat/lng + filter query params and hydrates the store.
@@ -31,6 +32,9 @@ export function applyQueryParams(search: string): boolean {
 
   const minBat = parseInt(params.get('minBat') ?? '');
   if (!isNaN(minBat)) store.setMinBattery(minBat === 0 ? UNSET : minBat);
+
+  const rawTheme = params.get('theme') as Theme | null;
+  if (rawTheme === 'dark' || rawTheme === 'light') theme.value = rawTheme;
 
   return true;
 }
