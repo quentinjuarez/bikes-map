@@ -1,12 +1,14 @@
 <template>
   <RouterView />
   <InstallBanner v-if="!isEmbed" />
+  <DebugInstallPanel />
 </template>
 
 <script setup lang="ts">
 import { computed, onErrorCaptured } from 'vue';
 import { RouterView, useRoute } from 'vue-router';
 
+import DebugInstallPanel from './components/DebugInstallPanel.vue';
 import InstallBanner from './components/InstallBanner.vue';
 import { useTheme } from './composables/useTheme';
 

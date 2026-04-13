@@ -33,27 +33,61 @@ function readInstallDismissed(): boolean {
 let deferredPrompt: BeforeInstallPromptEvent | null = null;
 export const showBanner = ref(false);
 
-const isInstalled =
+export const isInstalled =
   typeof window !== 'undefined' &&
   window.matchMedia('(display-mode: standalone)').matches;
 
+// Debug info — updated reactively so a debug panel can display live state
+export const debugInstall = ref({
+  isIOS,
+  isInstalled,
+  isHttps: typeof window !== 'undefined' && location.protocol === 'https:',
+  promptFired: false,
+  promptFiredAt: null as string | null,
+  hasDeferredPrompt: false,
+  appInstalled: false,
+  isDismissed: readInstallDismissed(),
+  showBanner: false,
+  swRegistered: false,
+  swState: 'unknown' as string,
+  userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : '',
+});
+
 if (typeof window !== 'undefined' && !isInstalled) {
+  // Async: check SW registration state
+  navigator.serviceWorker?.getRegistration().then((reg) => {
+    debugInstall.value.swRegistered = !!reg;
+    debugInstall.value.swState = reg?.active?.state ?? reg?.installing?.state ?? reg?.waiting?.state ?? 'none';
+  });
+
   if (isIOS) {
     setTimeout(() => {
-      if (!readInstallDismissed()) showBanner.value = true;
+      const dismissed = readInstallDismissed();
+      debugInstall.value.isDismissed = dismissed;
+      if (!dismissed) showBanner.value = true;
+      debugInstall.value.showBanner = showBanner.value;
     }, 2000);
   } else {
     window.addEventListener('beforeinstallprompt', (e: Event) => {
       e.preventDefault();
       deferredPrompt = e as BeforeInstallPromptEvent;
+      debugInstall.value.promptFired = true;
+      debugInstall.value.promptFiredAt = new Date().toISOString();
+      debugInstall.value.hasDeferredPrompt = true;
       setTimeout(() => {
-        if (!readInstallDismissed()) showBanner.value = true;
+        const dismissed = readInstallDismissed();
+        debugInstall.value.isDismissed = dismissed;
+        if (!dismissed) showBanner.value = true;
+        debugInstall.value.showBanner = showBanner.value;
       }, 2000);
     });
 
     window.addEventListener('appinstalled', () => {
       deferredPrompt = null;
       showBanner.value = false;
+      debugInstall.value.appInstalled = true;
+      debugInstall.value.hasDeferredPrompt = false;
+      debugInstall.value.showBanner = false;
     });
   }
 }
