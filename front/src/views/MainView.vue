@@ -37,6 +37,9 @@
     <!-- First-run onboarding modal -->
     <OnboardingModal v-if="showOnboarding" @close="dismissOnboarding" />
 
+    <!-- PWA install banner -->
+    <InstallBanner />
+
     <!-- Settings -->
     <SettingsPanel :open="showSettings" @close="showSettings = false" />
     <!-- Bike list -->
@@ -50,6 +53,7 @@ import { useI18n } from 'vue-i18n';
 
 import BaseButton from '../components/BaseButton.vue';
 import BikeList from '../components/BikeList.vue';
+import InstallBanner from '../components/InstallBanner.vue';
 import BikeMap from '../components/BikeMap.vue';
 import GeoWidget from '../components/GeoWidget.vue';
 import OnboardingModal from '../components/OnboardingModal.vue';
