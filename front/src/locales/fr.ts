@@ -12,6 +12,7 @@ export default {
     subtitle: 'Accès instantané depuis votre écran d’accueil',
     install: 'Installer',
     later: 'Plus tard',
+    androidHint: 'Appuyez sur ⋮ puis « Ajouter à l’écran d’accueil »',
     iosHint:
       'Sur iOS, utilisez le bouton de partage de votre navigateur puis « Ajouter à l’écran d’accueil »',
   },

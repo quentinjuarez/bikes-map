@@ -13,6 +13,7 @@ export default {
     install: 'Install',
     later: 'Later',
     iosHint: 'Tap the Share button then "Add to Home Screen"',
+    androidHint: 'Tap \u22ee then "Add to Home Screen"',
   },
   onboardingModal: {
     title: 'Welcome to Bike Tracker',

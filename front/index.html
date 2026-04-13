@@ -165,28 +165,5 @@
   <body class="antialiased">
     <div id="app"></div>
     <script type="module" src="/src/main.ts"></script>
-    <!-- PWA: capture beforeinstallprompt BEFORE any module loads so it is never missed -->
-    <script>
-      window.__pwaPrompt = null;
-      window.addEventListener('beforeinstallprompt', function (e) {
-        e.preventDefault();
-        window.__pwaPrompt = e;
-        window.dispatchEvent(new CustomEvent('pwa:ready'));
-        console.log('[PWA] beforeinstallprompt captured at', new Date().toISOString());
-      });
-      window.addEventListener('appinstalled', function () {
-        window.__pwaPrompt = null;
-        window.dispatchEvent(new CustomEvent('pwa:installed'));
-        console.log('[PWA] app installed');
-      });
-    </script>
-    <!-- Service Worker registration -->
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', function () {
-          navigator.serviceWorker.register('/sw.js').catch(function () {});
-        });
-      }
-    </script>
   </body>
 </html>
