@@ -8,8 +8,10 @@ import { i18n } from './i18n';
 import router from './router/index';
 
 // Increment this when a breaking change requires wiping all user data.
-const DATA_VERSION = 1;
-const VERSION_KEY = 'lime-tracker-version';
+// Changing the key name from 'lime-tracker-version' to 'bike-tracker:version' acts as
+// an implicit migration trigger: old key not found → version 0 < 2 → clear.
+const DATA_VERSION = 2;
+const VERSION_KEY = 'bike-tracker:version';
 if (parseInt(localStorage.getItem(VERSION_KEY) ?? '0') < DATA_VERSION) {
   localStorage.clear();
   localStorage.setItem(VERSION_KEY, String(DATA_VERSION));

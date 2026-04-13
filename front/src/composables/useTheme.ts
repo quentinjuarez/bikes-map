@@ -2,7 +2,7 @@ import { ref, watch, onMounted, onUnmounted } from 'vue';
 
 export type Theme = 'dark' | 'light';
 
-const STORAGE_KEY = 'lime-tracker-theme';
+const STORAGE_KEY = 'bike-tracker:theme';
 
 function getInitialTheme(): Theme {
   const stored = localStorage.getItem(STORAGE_KEY) as Theme | null;

@@ -1,65 +1,59 @@
-import { ref, watch } from 'vue';
+import { ref } from 'vue';
+
+import { useAppStore } from '../stores/app';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }
 
-const DISMISSED_KEY = 'pwa-install-dismissed';
-
 // ── Platform detection ────────────────────────────────────────────────
 
-// beforeinstallprompt never fires on iOS/Safari — detect so the banner
-// can show share-sheet instructions instead of a programmatic install button.
 export const isIOS =
   typeof window !== 'undefined' &&
   (/iPad|iPhone|iPod/.test(navigator.userAgent) ||
-    // iPadOS 13+ reports as "MacIntel" but has multiple touch points
     (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1));
 
 // ── Module-level singleton ────────────────────────────────────────────
-// All state and listeners live at module scope so they are never torn
-// down by component unmounts. beforeinstallprompt fires at most once —
-// a component remounting after the event fires would miss it entirely.
+// Listeners and deferred prompt live at module scope — beforeinstallprompt
+// fires at most once and must not be missed by a component remount.
+//
+// isDismissed is read directly from the lt:app Pinia persist key (same JSON
+// Pinia writes) so we can check it before the Vue app is created.
+// Writes go through useAppStore() once Pinia is available (component context).
 
-const deferredPrompt = ref<BeforeInstallPromptEvent | null>(null);
-const canInstall = ref(false);
-const isInstalled = ref(
+function readInstallDismissed(): boolean {
+  try {
+    const raw = localStorage.getItem('bike-tracker:app');
+    if (raw) return JSON.parse(raw)?.installDismissed === true;
+  } catch {}
+  return false;
+}
+
+let deferredPrompt: BeforeInstallPromptEvent | null = null;
+export const showBanner = ref(false);
+
+const isInstalled =
   typeof window !== 'undefined' &&
-    window.matchMedia('(display-mode: standalone)').matches,
-);
-const isDismissed = ref(
-  typeof localStorage !== 'undefined' && localStorage.getItem(DISMISSED_KEY) === '1',
-);
-const showBanner = ref(false);
+  window.matchMedia('(display-mode: standalone)').matches;
 
-if (typeof window !== 'undefined' && !isInstalled.value) {
+if (typeof window !== 'undefined' && !isInstalled) {
   if (isIOS) {
-    // iOS: no install event — show instructions after a short delay
     setTimeout(() => {
-      if (!isDismissed.value && !isInstalled.value) showBanner.value = true;
+      if (!readInstallDismissed()) showBanner.value = true;
     }, 2000);
   } else {
-    // Android / Chrome desktop: wait for the browser install prompt
     window.addEventListener('beforeinstallprompt', (e: Event) => {
       e.preventDefault();
-      deferredPrompt.value = e as BeforeInstallPromptEvent;
-      canInstall.value = true;
+      deferredPrompt = e as BeforeInstallPromptEvent;
+      setTimeout(() => {
+        if (!readInstallDismissed()) showBanner.value = true;
+      }, 2000);
     });
 
     window.addEventListener('appinstalled', () => {
-      deferredPrompt.value = null;
-      canInstall.value = false;
-      isInstalled.value = true;
+      deferredPrompt = null;
       showBanner.value = false;
-    });
-
-    watch(canInstall, (ready) => {
-      if (ready && !isDismissed.value && !isInstalled.value) {
-        setTimeout(() => {
-          if (canInstall.value && !isDismissed.value) showBanner.value = true;
-        }, 2000);
-      }
     });
   }
 }
@@ -68,20 +62,18 @@ if (typeof window !== 'undefined' && !isInstalled.value) {
 
 export function useInstallPrompt() {
   async function triggerInstall() {
-    if (!deferredPrompt.value) return;
-    await deferredPrompt.value.prompt();
-    const { outcome } = await deferredPrompt.value.userChoice;
+    if (!deferredPrompt) return;
+    await deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
     if (outcome === 'accepted') {
-      deferredPrompt.value = null;
-      canInstall.value = false;
+      deferredPrompt = null;
       showBanner.value = false;
     }
   }
 
   function dismiss() {
     showBanner.value = false;
-    isDismissed.value = true;
-    localStorage.setItem(DISMISSED_KEY, '1');
+    useAppStore().installDismissed = true;
   }
 
   return { showBanner, isIOS, triggerInstall, dismiss };

@@ -6,10 +6,14 @@
       >
         <!-- Text -->
         <div class="min-w-0 flex-1">
-          <p class="truncate text-xs font-semibold tracking-wide text-accent-700 dark:text-accent-300">
+          <p
+            class="truncate text-xs font-semibold tracking-wide text-accent-700 dark:text-accent-300"
+          >
             {{ t('install.title') }}
           </p>
-          <p class="mt-0.5 text-[10px] leading-tight text-accent-400 dark:text-accent-500">
+          <p
+            class="mt-0.5 text-[10px] leading-tight text-accent-400 dark:text-accent-500"
+          >
             {{ isIOS ? t('install.iosHint') : t('install.subtitle') }}
           </p>
         </div>

@@ -7,7 +7,7 @@ export type Locale = 'en' | 'fr';
 export const SUPPORTED_LOCALES: Locale[] = ['en', 'fr'];
 
 function detectLocale(): Locale {
-  const saved = localStorage.getItem('locale') as Locale | null;
+  const saved = localStorage.getItem('bike-tracker:locale') as Locale | null;
   if (saved && SUPPORTED_LOCALES.includes(saved)) return saved;
 
   // Probe browser/system language
@@ -28,6 +28,6 @@ export const i18n = createI18n({
 
 export function setLocale(locale: Locale) {
   (i18n.global.locale as { value: Locale }).value = locale;
-  localStorage.setItem('locale', locale);
+  localStorage.setItem('bike-tracker:locale', locale);
   document.documentElement.lang = locale;
 }

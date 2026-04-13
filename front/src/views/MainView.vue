@@ -57,29 +57,28 @@ import SettingsPanel from '../components/SettingsPanel.vue';
 import SpinnerIcon from '../components/SpinnerIcon.vue';
 import { useBikes } from '../composables/useBikes';
 import { applyQueryParams } from '../composables/useQueryParams';
+import { useAppStore } from '../stores/app';
 import { useProfileStore } from '../stores/profile';
 import { ALL_PROVIDERS, FILTER_BOUNDS, UNSET } from '../types';
 
 const store = useProfileStore();
+const appStore = useAppStore();
 const { t } = useI18n();
 
 const showList = ref(false);
 const showSettings = ref(false);
-
-const ONBOARDING_KEY = 'lt_onboarding_seen';
 const showOnboarding = ref(false);
 
 function dismissOnboarding() {
   showOnboarding.value = false;
-  localStorage.setItem(ONBOARDING_KEY, '1');
+  appStore.onboardingSeen = true;
 }
 
 onMounted(() => {
   // Query params take priority (shared link / embed-like usage on main view)
   applyQueryParams(window.location.search);
 
-  // Show first-run modal if not previously dismissed
-  if (!localStorage.getItem(ONBOARDING_KEY)) {
+  if (!appStore.onboardingSeen) {
     showOnboarding.value = true;
   }
 });
