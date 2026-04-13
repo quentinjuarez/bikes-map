@@ -18,11 +18,21 @@
       name="description"
       content="Lime, Voi, Dott et Vélib réunis sur une seule carte en temps réel. Trouvez le vélo le plus proche en quelques secondes, où que vous soyez à Paris."
     />
+    <meta
+      name="keywords"
+      content="vélo Paris, trottinette Paris, Lime Paris, Voi Paris, Dott Paris, Vélib Paris, mobilité douce Paris, vélo en libre-service, trottinette électrique Paris, carte vélos Paris"
+    />
     <meta name="theme-color" content="#a78bfa" />
     <meta name="author" content="Quentin Juarez" />
     <link rel="canonical" href="https://bikes.quentinjuarez.dev" />
     <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
     <link rel="me" href="https://www.quentinjuarez.dev" />
+
+    <!-- Geo targeting — helps search engines rank for Paris local queries -->
+    <meta name="geo.region" content="FR-75" />
+    <meta name="geo.placename" content="Paris, Île-de-France, France" />
+    <meta name="geo.position" content="48.8566;2.3522" />
+    <meta name="ICBM" content="48.8566, 2.3522" />
 
     <!-- Open Graph -->
     <meta property="og:type" content="website" />
@@ -37,6 +47,7 @@
     />
     <meta property="og:url" content="https://bikes.quentinjuarez.dev" />
     <meta property="og:locale" content="fr_FR" />
+    <meta property="og:locale:alternate" content="en_GB" />
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary" />
@@ -97,28 +108,57 @@
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
-        "@type": "WebApplication",
-        "name": "Bike Tracker",
-        "url": "https://bikes.quentinjuarez.dev",
-        "description": "Lime, Voi, Dott et Vélib réunis sur une seule carte en temps réel. Trouvez le vélo le plus proche en quelques secondes, où que vous soyez à Paris.",
-        "applicationCategory": "UtilitiesApplication",
-        "operatingSystem": "Any",
-        "inLanguage": "fr",
-        "areaServed": {
-          "@type": "City",
-          "name": "Paris",
-          "sameAs": "https://www.wikidata.org/wiki/Q90"
-        },
-        "author": {
-          "@type": "Person",
-          "name": "Quentin Juarez",
-          "url": "https://www.quentinjuarez.dev"
-        },
-        "creator": {
-          "@type": "Person",
-          "name": "Quentin Juarez",
-          "url": "https://www.quentinjuarez.dev"
-        }
+        "@graph": [
+          {
+            "@type": ["WebApplication", "MobileApplication"],
+            "@id": "https://bikes.quentinjuarez.dev/#app",
+            "name": "Bike Tracker",
+            "alternateName": "Bike Tracker Paris",
+            "url": "https://bikes.quentinjuarez.dev",
+            "description": "Lime, Voi, Dott et Vélib réunis sur une seule carte en temps réel. Trouvez le vélo le plus proche en quelques secondes, où que vous soyez à Paris.",
+            "applicationCategory": "UtilitiesApplication",
+            "applicationSubCategory": "Transportation",
+            "operatingSystem": "Any",
+            "inLanguage": ["fr", "en"],
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "EUR"
+            },
+            "featureList": [
+              "Carte en temps réel des vélos Lime, Voi et Dott disponibles",
+              "Stations Vélib avec disponibilité des vélos mécaniques et électriques",
+              "Filtrage par distance à pied, niveau de batterie et opérateur",
+              "Géolocalisation automatique ou saisie manuelle",
+              "Application installable sur mobile (PWA)"
+            ],
+            "keywords": "vélo Paris, trottinette Paris, Lime Paris, Voi Paris, Dott Paris, Vélib Paris, mobilité douce Paris, GBFS, carte vélos Paris",
+            "areaServed": {
+              "@type": "City",
+              "name": "Paris",
+              "sameAs": "https://www.wikidata.org/wiki/Q90",
+              "containedInPlace": {
+                "@type": "Country",
+                "name": "France",
+                "sameAs": "https://www.wikidata.org/wiki/Q142"
+              }
+            },
+            "spatialCoverage": {
+              "@type": "Place",
+              "name": "Paris et sa proche banlieue",
+              "geo": {
+                "@type": "GeoCoordinates",
+                "latitude": 48.8566,
+                "longitude": 2.3522
+              }
+            },
+            "author": {
+              "@type": "Person",
+              "name": "Quentin Juarez",
+              "url": "https://www.quentinjuarez.dev"
+            }
+          }
+        ]
       }
     </script>
   </head>

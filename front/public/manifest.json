@@ -2,6 +2,7 @@
   "name": "Bike Tracker – Paris",
   "short_name": "Bike Tracker",
   "description": "Lime, Voi, Dott et Vélib réunis sur une seule carte en temps réel. Trouvez le vélo le plus proche à Paris.",
+  "lang": "fr",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
@@ -9,7 +10,16 @@
   "orientation": "portrait-primary",
   "background_color": "#000000",
   "theme_color": "#a78bfa",
-  "categories": ["navigation", "utilities"],
+  "categories": ["navigation", "utilities", "travel"],
+  "shortcuts": [
+    {
+      "name": "Carte des vélos",
+      "short_name": "Carte",
+      "description": "Ouvrir la carte en temps réel",
+      "url": "/",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    }
+  ],
   "icons": [
     {
       "src": "/icon-192.png",
