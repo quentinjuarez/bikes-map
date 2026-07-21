@@ -2,10 +2,14 @@ export default {
   main: {
     list: 'Liste',
     settings: 'Paramètres',
-    gettingLocation: 'Récupération de la position…',
-    nextRefresh: '↻ {n}s',
+    gettingLocation: 'Récupération de la position',
+    nextRefresh: 'Prochaine actualisation dans {n}s',
     locateMe: 'Me localiser',
-    locating: 'Localisation…',
+    locating: 'Localisation',
+  },
+  providerChips: {
+    show: 'Afficher {name}',
+    hide: 'Masquer {name}',
   },
   install: {
     title: 'Installer l’app',
@@ -29,7 +33,7 @@ export default {
   onboarding: {
     title: 'Bike Tracker',
     subtitle:
-      'Tous les opérateurs parisiens sur une seule carte — Lime, Voi, Dott et Vélib en temps réel.',
+      'Tous les opérateurs parisiens sur une seule carte : Lime, Voi, Dott et Vélib en temps réel.',
     useGps: 'Utiliser ma position GPS',
     or: 'ou entrer manuellement',
     supportedFormats: 'Formats supportés',
@@ -164,7 +168,7 @@ export default {
   geo: {
     enterManually: 'Définir manuellement',
     cancel: 'Annuler',
-    placeholder: '48.8566, 2.3522 ou lien Google Maps…',
+    placeholder: '48.8566, 2.3522 ou lien Google Maps',
     cannotParse: 'Impossible de lire cette position',
     confirm: 'Valider',
     helperText: 'Collez des coordonnées (48.8566, 2.3522) ou un lien Google Maps.',
@@ -180,10 +184,12 @@ export default {
     anyBattery: 'Peu importe',
     resetDefaults: 'Réinitialiser',
     copyLink: 'Copier le lien',
-    linkCopied: '✓ Lien copié !',
+    linkCopied: 'Lien copié',
     lightMode: 'Mode clair',
     darkMode: 'Mode sombre',
     language: 'Langue',
     location: 'Localisation',
+    noLocation: 'Aucune position',
+    done: 'Terminé',
   },
 } as const;

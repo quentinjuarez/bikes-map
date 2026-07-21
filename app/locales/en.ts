@@ -2,10 +2,14 @@ export default {
   main: {
     list: 'List',
     settings: 'Settings',
-    gettingLocation: 'Getting your location…',
-    nextRefresh: '↻ {n}s',
+    gettingLocation: 'Getting your location',
+    nextRefresh: 'Next refresh in {n}s',
     locateMe: 'Locate me',
-    locating: 'Locating…',
+    locating: 'Locating',
+  },
+  providerChips: {
+    show: 'Show {name}',
+    hide: 'Hide {name}',
   },
   install: {
     title: 'Install the app',
@@ -27,7 +31,7 @@ export default {
   },
   onboarding: {
     title: 'Bike Tracker',
-    subtitle: 'Every Paris bike operator on one map — Lime, Voi, Dott and Vélib in real time.',
+    subtitle: 'Every Paris bike operator on one map: Lime, Voi, Dott and Vélib in real time.',
     useGps: 'Use my GPS location',
     or: 'or enter manually',
     supportedFormats: 'Supported formats',
@@ -161,7 +165,7 @@ export default {
   geo: {
     enterManually: 'Set location manually',
     cancel: 'Cancel',
-    placeholder: '48.8566, 2.3522 or Google Maps link…',
+    placeholder: '48.8566, 2.3522 or Google Maps link',
     cannotParse: 'Could not recognise this location',
     confirm: 'Set',
     helperText: 'Paste coordinates (48.8566, 2.3522), a decimal pair or a Google Maps link.',
@@ -177,10 +181,12 @@ export default {
     anyBattery: 'Any',
     resetDefaults: 'Reset to defaults',
     copyLink: 'Copy settings as link',
-    linkCopied: '✓ Link copied!',
+    linkCopied: 'Link copied',
     lightMode: 'Switch to light mode',
     darkMode: 'Switch to dark mode',
     language: 'Language',
     location: 'Location',
+    noLocation: 'No location set',
+    done: 'Done',
   },
 } as const;

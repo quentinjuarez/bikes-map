@@ -1,20 +1,10 @@
 <template>
-  <div class="border-t border-accent-100 pt-4 text-center dark:border-accent-900">
-    <p class="space-x-2 text-[10px] tracking-widest text-accent-400 uppercase dark:text-accent-500">
-      <NuxtLink
-        to="/legal"
-        class="underline underline-offset-2 transition-colors hover:text-accent-700 dark:hover:text-accent-300"
-      >
-        {{ t('footer.legal') }}
-      </NuxtLink>
-      <span>·</span>
-      <NuxtLink
-        to="/privacy"
-        class="underline underline-offset-2 transition-colors hover:text-accent-700 dark:hover:text-accent-300"
-      >
-        {{ t('footer.privacy') }}
-      </NuxtLink>
-    </p>
+  <div class="flex items-center justify-center gap-3 border-t border-line pt-4 text-xs text-muted">
+    <NuxtLink to="/legal" class="transition-colors hover:text-fg">{{ t('footer.legal') }}</NuxtLink>
+    <span class="h-3 w-px bg-line" aria-hidden="true" />
+    <NuxtLink to="/privacy" class="transition-colors hover:text-fg">
+      {{ t('footer.privacy') }}
+    </NuxtLink>
   </div>
 </template>
 

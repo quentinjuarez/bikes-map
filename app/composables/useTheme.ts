@@ -7,7 +7,7 @@ const STORAGE_KEY = 'bike-tracker:theme';
 function getInitialTheme(): Theme {
   const stored = localStorage.getItem(STORAGE_KEY) as Theme | null;
   if (stored === 'light' || stored === 'dark') return stored;
-  return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+  return 'light'; // light-first; users can toggle to dark
 }
 
 function onKeyDown(e: KeyboardEvent) {
@@ -33,11 +33,13 @@ watch(theme, (t) => {
   localStorage.setItem(STORAGE_KEY, t);
 });
 
-export function useTheme() {
-  function toggleTheme() {
-    theme.value = theme.value === 'dark' ? 'light' : 'dark';
-  }
+// Module-level so callers can toggle without invoking the composable (which
+// would register a second global keydown listener).
+export function toggleTheme() {
+  theme.value = theme.value === 'dark' ? 'light' : 'dark';
+}
 
+export function useTheme() {
   onMounted(() => {
     window.addEventListener('keydown', onKeyDown);
   });

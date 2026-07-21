@@ -1,8 +1,8 @@
 <template>
   <div class="space-y-1">
     <div class="flex justify-between text-xs">
-      <span>{{ label }}</span>
-      <span class="font-mono text-accent-400 dark:text-accent-500">{{ displayValue }}</span>
+      <span class="text-fg">{{ label }}</span>
+      <span class="font-mono text-muted">{{ displayValue }}</span>
     </div>
     <input
       type="range"

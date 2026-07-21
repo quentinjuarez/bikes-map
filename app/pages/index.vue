@@ -1,38 +1,58 @@
 <template>
-  <div class="relative flex h-dvh w-full flex-col overflow-hidden bg-[#fafaf9] dark:bg-[#0c0c14]">
+  <div class="relative flex h-dvh w-full flex-col overflow-hidden bg-canvas">
     <!-- Map always visible -->
     <BikeMap :bikes="bikes" :user-lat="store.lat ?? undefined" :user-lng="store.lng ?? undefined" />
 
-    <!-- Top-right HUD -->
-    <div class="fixed top-4 right-4 z-1000 flex flex-none items-center gap-2">
-      <BaseButton @click="showList = true" variant="ghost" size="sm">
-        {{ t('main.list') }}
-      </BaseButton>
-      <BaseButton @click="showSettings = true" variant="ghost" size="sm">
-        {{ t('main.settings') }}
-      </BaseButton>
-      <div
-        class="flex min-w-16 items-center justify-center rounded-xl border border-accent-200 bg-accent-500/5 px-3 py-1.5 font-mono text-xs text-accent-600 backdrop-blur-sm dark:border-accent-700 dark:bg-black/10 dark:text-accent-400"
-      >
-        <SpinnerIcon v-if="loading" size="sm" />
-        <span v-if="!loading" class="flex-none">{{
-          t('main.nextRefresh', { n: nextRefresh })
-        }}</span>
-      </div>
+    <!-- Provider filter chips (double as the map legend) -->
+    <div class="fixed top-4 left-4 z-1000 max-w-[min(62vw,32rem)]">
+      <ProviderChips />
     </div>
 
-    <!-- Geolocation widget (bottom-right) -->
+    <!-- Top-right control bar -->
+    <div
+      class="fixed top-4 right-4 z-1000 flex flex-none items-center gap-1 rounded-xl border border-line bg-surface p-1 shadow-pop"
+    >
+      <div
+        class="flex items-center gap-1.5 px-2 text-xs text-muted"
+        :title="t('main.nextRefresh', { n: nextRefresh })"
+      >
+        <SpinnerIcon v-if="loading" size="sm" />
+        <span v-else class="font-mono tabular-nums">{{ nextRefresh }}s</span>
+      </div>
+      <span class="h-5 w-px bg-line" />
+      <button type="button" :class="hudBtn" @click="showList = true">
+        <List :size="18" />
+        <span class="hidden sm:inline">{{ t('main.list') }}</span>
+      </button>
+      <button type="button" :class="hudBtn" @click="showSettings = true">
+        <SlidersHorizontal :size="18" />
+        <span class="hidden sm:inline">{{ t('main.settings') }}</span>
+      </button>
+      <button
+        type="button"
+        :class="hudBtn"
+        :title="theme === 'dark' ? t('settings.lightMode') : t('settings.darkMode')"
+        @click="toggleTheme"
+      >
+        <Sun v-if="theme === 'dark'" :size="18" />
+        <Moon v-else :size="18" />
+      </button>
+    </div>
+
+    <!-- Locate control (bottom-right) -->
     <div class="fixed right-4 bottom-6 z-1000">
       <GeoWidget />
     </div>
 
     <!-- API error toast -->
-    <div
-      v-if="error"
-      class="fixed top-16 right-4 z-1000 max-w-xs rounded-lg border border-red-800 bg-red-900 px-3 py-2 font-mono text-xs text-red-400 shadow-lg"
-    >
-      {{ error }}
-    </div>
+    <Transition name="fade">
+      <div
+        v-if="error"
+        class="fixed top-20 left-1/2 z-1000 max-w-xs -translate-x-1/2 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-medium text-red-700 shadow-pop dark:border-red-900 dark:bg-red-950 dark:text-red-300"
+      >
+        {{ error }}
+      </div>
+    </Transition>
 
     <!-- First-run onboarding modal -->
     <OnboardingModal v-if="showOnboarding" @close="dismissOnboarding" />
@@ -48,20 +68,22 @@
 </template>
 
 <script setup lang="ts">
+import { List, Moon, SlidersHorizontal, Sun } from '@lucide/vue';
 import { ref, onMounted, onUnmounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-import BaseButton from '../components/BaseButton.vue';
 import BikeList from '../components/BikeList.vue';
 import BikeMap from '../components/BikeMap.vue';
 import GeoWidget from '../components/GeoWidget.vue';
 import InstallBanner from '../components/InstallBanner.vue';
 import OnboardingModal from '../components/OnboardingModal.vue';
+import ProviderChips from '../components/ProviderChips.vue';
 import SettingsPanel from '../components/SettingsPanel.vue';
 import SpinnerIcon from '../components/SpinnerIcon.vue';
 import { useBikes } from '../composables/useBikes';
 import { useGeolocation } from '../composables/useGeolocation';
 import { applyQueryParams } from '../composables/useQueryParams';
+import { theme, toggleTheme } from '../composables/useTheme';
 import { useAppStore } from '../stores/app';
 import { useProfileStore } from '../stores/profile';
 import { ALL_PROVIDERS, FILTER_BOUNDS, UNSET } from '../types';
@@ -70,6 +92,10 @@ const store = useProfileStore();
 const appStore = useAppStore();
 const { t } = useI18n();
 const { locate } = useGeolocation();
+
+// Shared style for the top-bar icon buttons (borderless; the bar provides surface + shadow).
+const hudBtn =
+  'flex items-center gap-1.5 rounded-lg px-2.5 py-2 text-sm font-medium text-fg transition-colors hover:bg-surface-2 focus-visible:ring-2 focus-visible:ring-accent-500/50 focus-visible:outline-none';
 
 const showList = ref(false);
 const showSettings = ref(false);

@@ -28,31 +28,6 @@
         </l-tooltip>
       </l-marker>
     </l-map>
-
-    <div
-      class="absolute bottom-4 left-4 z-1000 space-y-1 rounded-xl bg-accent-500/5 px-3 py-2 text-xs text-accent-600 shadow-sm backdrop-blur-sm dark:bg-black/10 dark:text-accent-400"
-    >
-      <div class="flex items-center gap-2">
-        <span class="inline-block h-3 w-3 rounded-full bg-accent-500 dark:bg-accent-400"></span>
-        {{ t('bikeMap.me') }}
-      </div>
-      <div class="flex items-center gap-2">
-        <span class="inline-block h-3 w-3 rounded-full bg-lime-brand"></span>
-        Lime
-      </div>
-      <div class="flex items-center gap-2">
-        <span class="inline-block h-3 w-3 rounded-full bg-voi-brand"></span>
-        Voi
-      </div>
-      <div class="flex items-center gap-2">
-        <span class="inline-block h-3 w-3 rounded-full bg-dott-brand"></span>
-        Dott
-      </div>
-      <div class="flex items-center gap-2">
-        <span class="inline-block h-3 w-3 rounded-full bg-velib-brand"></span>
-        Vélib
-      </div>
-    </div>
   </div>
 </template>
 
@@ -64,7 +39,7 @@ import { useI18n } from 'vue-i18n';
 
 import 'leaflet/dist/leaflet.css';
 import type { Bike, VelibStation, MapEntity, Provider } from '../composables/useBikes';
-import { useTheme } from '../composables/useTheme';
+import { theme } from '../composables/useTheme';
 
 const props = defineProps<{
   bikes: MapEntity[];
@@ -72,20 +47,14 @@ const props = defineProps<{
   userLng?: number;
 }>();
 
-const { theme } = useTheme();
 const { t } = useI18n();
 
 // ── Tile config ─────────────────────────────────────────────────────
 
 const TILE_DARK = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
-const TILE_LIGHT =
-  'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}';
+const TILE_LIGHT = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
 const tileUrl = computed(() => (theme.value === 'light' ? TILE_LIGHT : TILE_DARK));
-const tileAttribution = computed(() =>
-  theme.value === 'light'
-    ? 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ, TomTom, Intermap, iPC, USGS, FAO, NPS, NRCAN, GeoBase, Kadaster NL, Ordnance Survey, Esri Japan, METI, Esri China (Hong Kong), and the GIS User Community'
-    : '&copy; OpenStreetMap &copy; CARTO',
-);
+const tileAttribution = '&copy; OpenStreetMap &copy; CARTO';
 
 // ── Map initialisation ───────────────────────────────────────────────
 
@@ -142,6 +111,8 @@ function refreshBounds(map: L.Map) {
 
 function onMapReady(map: L.Map) {
   leafletMap = map;
+  // Move zoom control out from under the provider chips (top-left).
+  map.zoomControl?.setPosition('bottomleft');
   markersLayer = L.layerGroup().addTo(map);
 
   // If position is already known (persisted session), center immediately
@@ -479,9 +450,10 @@ watch(
 /* Leaflet zoom controls */
 :deep(.leaflet-control-zoom) {
   border: 1px solid var(--leaflet-ctrl-border) !important;
-  border-radius: 10px !important;
+  border-radius: 12px !important;
   overflow: hidden;
   background: transparent !important;
+  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.16) !important;
 }
 
 :deep(.leaflet-control-zoom a) {
@@ -493,7 +465,6 @@ watch(
   width: 32px !important;
   height: 32px !important;
   line-height: 32px !important;
-  backdrop-filter: blur(8px);
   transition:
     background 0.15s,
     color 0.15s;
@@ -517,7 +488,6 @@ watch(
   font-size: 9px !important;
   padding: 2px 8px !important;
   border-radius: 4px 0 0 0 !important;
-  backdrop-filter: blur(8px);
 }
 
 :deep(.leaflet-control-attribution a),

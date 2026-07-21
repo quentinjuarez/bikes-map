@@ -13,38 +13,24 @@
         class="fixed right-0 bottom-0 left-0 z-2000 p-4 pb-[max(1rem,env(safe-area-inset-bottom))]"
       >
         <div
-          class="mx-auto w-full max-w-sm rounded-2xl border border-accent-100 bg-white p-4 shadow-2xl dark:border-accent-900 dark:bg-[#111118]"
+          class="mx-auto w-full max-w-sm rounded-2xl border border-line bg-surface p-4 shadow-pop"
         >
           <div class="flex items-start gap-3">
             <!-- Text -->
             <div class="min-w-0 flex-1">
-              <p class="text-sm font-semibold text-accent-800 dark:text-accent-100">
-                {{ t('install.title') }}
-              </p>
-              <p class="mt-0.5 text-xs leading-snug text-accent-500 dark:text-accent-400">
+              <p class="text-sm font-semibold text-fg">{{ t('install.title') }}</p>
+              <p class="mt-0.5 text-xs leading-snug text-muted">
                 {{ isIos ? t('install.iosHint') : t('install.subtitle') }}
               </p>
             </div>
 
             <!-- Dismiss -->
             <button
-              class="flex-none text-accent-400 transition-colors hover:text-accent-600 dark:hover:text-accent-200"
+              class="flex-none rounded-lg p-1 text-muted transition-colors hover:bg-surface-2 hover:text-fg focus-visible:ring-2 focus-visible:ring-accent-500/50 focus-visible:outline-none"
               :aria-label="t('install.later')"
               @click="dismiss"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="h-4 w-4"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <line x1="18" y1="6" x2="6" y2="18" />
-                <line x1="6" y1="6" x2="18" y2="18" />
-              </svg>
+              <X :size="18" />
             </button>
           </div>
 
@@ -59,6 +45,7 @@
 </template>
 
 <script setup lang="ts">
+import { X } from '@lucide/vue';
 import { ref, onMounted, onBeforeUnmount, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 

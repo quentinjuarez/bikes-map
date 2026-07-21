@@ -1,54 +1,36 @@
 <template>
   <Teleport to="body">
     <div
-      class="fixed inset-0 z-3000 flex items-end justify-center bg-black/40 p-4 backdrop-blur-sm sm:items-center"
+      class="fixed inset-0 z-3000 flex items-end justify-center bg-black/40 p-4 sm:items-center"
       @click.self="emit('close')"
     >
       <div
-        class="w-full max-w-sm space-y-5 rounded-2xl border border-accent-100 bg-white p-6 shadow-2xl dark:border-accent-900 dark:bg-[#111118]"
+        class="w-full max-w-sm space-y-5 rounded-2xl border border-line bg-surface p-6 shadow-pop"
       >
         <!-- Header -->
         <div class="flex items-start justify-between gap-4">
           <div>
-            <h2 class="text-base font-semibold tracking-wide text-accent-800 dark:text-accent-100">
-              {{ t('onboardingModal.title') }}
-            </h2>
-            <p class="mt-1 text-xs text-accent-500 dark:text-accent-400">
-              {{ t('onboardingModal.subtitle') }}
-            </p>
+            <h2 class="text-base font-semibold text-fg">{{ t('onboardingModal.title') }}</h2>
+            <p class="mt-1 text-xs text-muted">{{ t('onboardingModal.subtitle') }}</p>
           </div>
           <button
-            class="mt-0.5 flex-none text-accent-400 transition-colors hover:text-accent-600 dark:hover:text-accent-200"
+            class="mt-0.5 flex-none rounded-lg p-1 text-muted transition-colors hover:bg-surface-2 hover:text-fg focus-visible:ring-2 focus-visible:ring-accent-500/50 focus-visible:outline-none"
             :aria-label="t('onboardingModal.close')"
             @click="emit('close')"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="h-4 w-4"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <line x1="18" y1="6" x2="6" y2="18" />
-              <line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
+            <X :size="18" />
           </button>
         </div>
 
         <!-- Tips -->
         <ul class="space-y-3">
           <li v-for="tip in tips" :key="tip.key" class="flex items-start gap-3">
-            <span
-              class="mt-0.5 w-5 flex-none text-center text-base leading-none"
-              aria-hidden="true"
-              >{{ tip.icon }}</span
-            >
-            <span class="text-sm leading-snug text-accent-700 dark:text-accent-300">
-              {{ t(tip.key) }}
-            </span>
+            <component
+              :is="tip.icon"
+              :size="18"
+              class="mt-0.5 flex-none text-accent-600 dark:text-accent-400"
+            />
+            <span class="text-sm leading-snug text-fg">{{ t(tip.key) }}</span>
           </li>
         </ul>
 
@@ -62,6 +44,7 @@
 </template>
 
 <script setup lang="ts">
+import { LocateFixed, Map as MapIcon, MousePointerClick, SlidersHorizontal, X } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
 
 import BaseButton from './BaseButton.vue';
@@ -70,9 +53,9 @@ const emit = defineEmits<{ close: [] }>();
 const { t } = useI18n();
 
 const tips = [
-  { icon: '🗺️', key: 'onboardingModal.tip1' },
-  { icon: '📍', key: 'onboardingModal.tip2' },
-  { icon: '🔍', key: 'onboardingModal.tip3' },
-  { icon: '♻️', key: 'onboardingModal.tip4' },
+  { icon: MapIcon, key: 'onboardingModal.tip1' },
+  { icon: LocateFixed, key: 'onboardingModal.tip2' },
+  { icon: MousePointerClick, key: 'onboardingModal.tip3' },
+  { icon: SlidersHorizontal, key: 'onboardingModal.tip4' },
 ];
 </script>
