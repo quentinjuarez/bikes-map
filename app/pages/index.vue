@@ -91,7 +91,7 @@ import { ALL_PROVIDERS, FILTER_BOUNDS, UNSET } from '../types';
 const store = useProfileStore();
 const appStore = useAppStore();
 const { t } = useI18n();
-const { locate } = useGeolocation();
+const { startTracking, stopTracking } = useGeolocation();
 
 // Shared style for the top-bar icon buttons (borderless; the bar provides surface + shadow).
 const hudBtn =
@@ -106,12 +106,6 @@ function dismissOnboarding() {
   appStore.onboardingSeen = true;
 }
 
-function onVisibilityChange() {
-  if (document.visibilityState === 'visible' && store.locationMode === 'geo') {
-    locate();
-  }
-}
-
 onMounted(() => {
   // Query params take priority (shared link / embed-like usage on main view)
   applyQueryParams(window.location.search);
@@ -120,12 +114,22 @@ onMounted(() => {
     showOnboarding.value = true;
   }
 
-  // Re-fetch GPS when the tab becomes visible again (e.g. switching back on mobile)
-  document.addEventListener('visibilitychange', onVisibilityChange);
+  // Resume live tracking if the user was in geo mode with a known position
+  // (permission already granted in a prior session). First-time users start it
+  // via the locate button, so we do not prompt for permission on load.
+  if (store.locationMode === 'geo' && store.hasPosition) {
+    startTracking();
+  }
 });
 
+// Start/stop live tracking as the location mode changes (manual coords stop it).
+watch(
+  () => store.locationMode,
+  (mode) => (mode === 'geo' ? startTracking() : stopTracking()),
+);
+
 onUnmounted(() => {
-  document.removeEventListener('visibilitychange', onVisibilityChange);
+  stopTracking();
 });
 
 // Keep URL in sync with the store.

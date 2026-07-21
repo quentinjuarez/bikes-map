@@ -48,6 +48,7 @@ if (import.meta.client) {
   (window as unknown as { L: typeof L }).L = L;
 }
 import type { Bike, VelibStation, MapEntity, Provider } from '../composables/useBikes';
+import { following } from '../composables/useGeolocation';
 import { theme } from '../composables/useTheme';
 
 const props = defineProps<{
@@ -149,6 +150,10 @@ function onMapReady(map: L.Map) {
   leafletMap = map;
   // Move zoom control out from under the provider chips (top-left).
   map.zoomControl?.setPosition('bottomleft');
+  // Pause live-follow when the user pans the map themselves (resumed on locate).
+  map.on('dragstart', () => {
+    following.value = false;
+  });
   markersLayer = createMarkerGroup().addTo(map);
 
   // If position is already known (persisted session), center immediately
@@ -194,8 +199,12 @@ watch(
       e: lng + Z16_PAD_LNG,
       w: lng - Z16_PAD_LNG,
     };
-    if (leafletMap) {
-      leafletMap.flyTo([lat, lng], 16, { duration: 1.2 });
+    // First fix flies in; subsequent moves gently follow, unless the user
+    // has panned away (following = false).
+    const isFirst = prevLat == null || prevLng == null;
+    if (leafletMap && (isFirst || following.value)) {
+      if (isFirst) leafletMap.flyTo([lat, lng], 16, { duration: 1.2 });
+      else leafletMap.panTo([lat, lng], { animate: true, duration: 0.5 });
     }
   },
 );

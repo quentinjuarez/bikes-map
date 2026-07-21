@@ -1,4 +1,4 @@
-import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue';
 
 import { useProfileStore } from '../stores/profile';
 import {
@@ -10,6 +10,7 @@ import {
   type Provider,
   UNSET,
 } from '../types';
+import { haversineDistance } from '../utils/geo';
 
 interface RawVelibStation {
   station_id: string;
@@ -24,23 +25,15 @@ interface RawVelibStation {
 
 // Re-export for convenience
 export type { Bike, VelibStation, MapEntity, Provider } from '../types';
-
-export function haversineDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
-  const R = 6371e3;
-  const toRad = (n: number) => (n * Math.PI) / 180;
-  const dLat = toRad(lat2 - lat1);
-  const dLon = toRad(lon2 - lon1);
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-}
+export { haversineDistance } from '../utils/geo';
 
 const PARIS = { lat: 48.8566, lng: 2.3522 };
 
 export function useBikes(opts?: { proxyBase?: string }) {
   const store = useProfileStore();
-  const bikes = ref<MapEntity[]>([]);
+  // Raw fetched set (no distance baked in). Distance/filter/sort are derived
+  // reactively in `bikes` below, so moving recomputes locally without refetching.
+  const allEntities = ref<MapEntity[]>([]);
   const loading = ref(false);
   const error = ref<string | null>(null);
   const nextRefresh = ref(0);
@@ -51,60 +44,76 @@ export function useBikes(opts?: { proxyBase?: string }) {
   let fetchTimer: ReturnType<typeof setTimeout> | null = null;
   let countdownTimer: ReturnType<typeof setInterval> | null = null;
 
-  // ── Fetch helpers ────────────────────────────────────────────────────
+  // ── Fetch helpers (raw, position-independent) ────────────────────────
 
-  async function fetchProvider(
-    provider: Provider,
-    userLat: number,
-    userLng: number,
-  ): Promise<Bike[]> {
+  async function fetchProvider(provider: Provider): Promise<Bike[]> {
     const res = await fetch(`${proxyBase}/${provider}/free_bike_status`);
     if (!res.ok) throw new Error(`${provider} fetch failed: ${res.status}`);
     const json = (await res.json()) as GbfsResponse;
 
-    return (json.data?.bikes || []).map((b: GbfsBike) => {
-      const distance = haversineDistance(userLat, userLng, b.lat, b.lon);
-      return {
-        kind: 'bike',
-        bike_id: b.bike_id,
-        lat: b.lat,
-        lon: b.lon,
-        battery_percent: b.battery_percent,
-        distance,
-        provider,
-      } satisfies Bike;
-    });
+    return (json.data?.bikes || []).map(
+      (b: GbfsBike) =>
+        ({
+          kind: 'bike',
+          bike_id: b.bike_id,
+          lat: b.lat,
+          lon: b.lon,
+          battery_percent: b.battery_percent,
+          provider,
+        }) satisfies Bike,
+    );
   }
 
-  async function fetchVelib(userLat: number, userLng: number): Promise<VelibStation[]> {
+  async function fetchVelib(): Promise<VelibStation[]> {
     const res = await fetch(`${proxyBase}/velib/stations`);
     if (!res.ok) throw new Error(`velib fetch failed: ${res.status}`);
     const json = (await res.json()) as { stations: RawVelibStation[] };
 
-    return (json.stations || []).map((s: RawVelibStation) => {
-      const distance = haversineDistance(userLat, userLng, s.lat, s.lon);
-      return {
-        kind: 'station',
-        station_id: s.station_id,
-        lat: s.lat,
-        lon: s.lon,
-        num_bikes_available: s.num_bikes_available,
-        mechanical: s.mechanical,
-        ebike: s.ebike,
-        num_docks_available: s.num_docks_available,
-        is_renting: s.is_renting,
-        distance,
-        provider: 'velib' as const,
-      } satisfies VelibStation;
-    });
+    return (json.stations || []).map(
+      (s: RawVelibStation) =>
+        ({
+          kind: 'station',
+          station_id: s.station_id,
+          lat: s.lat,
+          lon: s.lon,
+          num_bikes_available: s.num_bikes_available,
+          mechanical: s.mechanical,
+          ebike: s.ebike,
+          num_docks_available: s.num_docks_available,
+          is_renting: s.is_renting,
+          provider: 'velib' as const,
+        }) satisfies VelibStation,
+    );
   }
+
+  // ── Derived view: distance + filters + sort (reacts to position live) ─
+
+  const bikes = computed<MapEntity[]>(() => {
+    const userLat = store.lat ?? PARIS.lat;
+    const userLng = store.lng ?? PARIS.lng;
+
+    let list = allEntities.value.map(
+      (e) => ({ ...e, distance: haversineDistance(userLat, userLng, e.lat, e.lon) }) as MapEntity,
+    );
+
+    if (store.hasPosition && store.maxDistance !== UNSET && store.maxDistance > 0) {
+      list = list.filter((e) => e.distance != null && e.distance <= store.maxDistance);
+    }
+
+    if (store.minBattery !== UNSET && store.minBattery > 0) {
+      list = list.filter(
+        (e) =>
+          e.kind === 'station' ||
+          (e.battery_percent != null && e.battery_percent >= store.minBattery),
+      );
+    }
+
+    return list.sort((a, b) => (a.distance ?? 0) - (b.distance ?? 0));
+  });
 
   // ── Core fetch ───────────────────────────────────────────────────────
 
   async function fetchOnce() {
-    const userLat = store.lat ?? PARIS.lat;
-    const userLng = store.lng ?? PARIS.lng;
-
     loading.value = true;
     error.value = null;
     try {
@@ -115,8 +124,8 @@ export function useBikes(opts?: { proxyBase?: string }) {
       const includeVelib = store.providers.includes('velib');
 
       const results = await Promise.allSettled([
-        ...bikeProviders.map((p) => fetchProvider(p, userLat, userLng)),
-        ...(includeVelib ? [fetchVelib(userLat, userLng)] : []),
+        ...bikeProviders.map((p) => fetchProvider(p)),
+        ...(includeVelib ? [fetchVelib()] : []),
       ]);
 
       const all: MapEntity[] = [];
@@ -133,21 +142,7 @@ export function useBikes(opts?: { proxyBase?: string }) {
 
       if (errors.length && !all.length) throw new Error(errors.join('; '));
 
-      let filtered = all;
-
-      if (store.hasPosition && store.maxDistance !== UNSET && store.maxDistance > 0) {
-        filtered = filtered.filter((e) => e.distance != null && e.distance <= store.maxDistance);
-      }
-
-      if (store.minBattery !== UNSET && store.minBattery > 0) {
-        filtered = filtered.filter(
-          (e) =>
-            e.kind === 'station' ||
-            (e.battery_percent != null && e.battery_percent >= store.minBattery),
-        );
-      }
-
-      bikes.value = filtered.sort((a, b) => (a.distance ?? 0) - (b.distance ?? 0));
+      allEntities.value = all;
     } catch (err: unknown) {
       error.value = err instanceof Error ? err.message : String(err);
     } finally {
@@ -166,8 +161,6 @@ export function useBikes(opts?: { proxyBase?: string }) {
       clearInterval(countdownTimer);
       countdownTimer = null;
     }
-    // Do NOT update nextRefresh here — avoid synchronous reactive mutations
-    // inside watcher callbacks which can conflict with mid-mount component updates
   }
 
   function scheduleNext() {
@@ -180,8 +173,6 @@ export function useBikes(opts?: { proxyBase?: string }) {
       scheduleNext();
     }, intervalMs);
 
-    // Defer countdown to next tick so it doesn't trigger re-renders
-    // in the same flush cycle as position-driven component mounts (LMarker v-if)
     nextTick(() => {
       nextRefresh.value = store.pollInterval;
       countdownTimer = setInterval(() => {
@@ -191,7 +182,6 @@ export function useBikes(opts?: { proxyBase?: string }) {
   }
 
   // Fetch immediately then schedule the next cycle.
-  // Does NOT clear bikes during the fetch — stale data stays visible.
   async function refresh() {
     clearTimers();
     await fetchOnce();
@@ -199,17 +189,9 @@ export function useBikes(opts?: { proxyBase?: string }) {
   }
 
   // ── Reactivity ───────────────────────────────────────────────────────
+  // NOTE: no position watch. Moving recomputes `bikes` locally (above); only
+  // the poll interval and provider changes trigger a network refetch.
 
-  // Re-fetch when position changes (user moved or GPS updated)
-  watch(
-    () => [store.lat, store.lng] as const,
-    ([lat, lng], [prevLat, prevLng]) => {
-      if (lat === prevLat && lng === prevLng) return;
-      refresh();
-    },
-  );
-
-  // Re-fetch when provider list changes (different API endpoints)
   watch(
     () => [...store.providers].sort().join(','),
     (val, prev) => {
@@ -218,7 +200,6 @@ export function useBikes(opts?: { proxyBase?: string }) {
     },
   );
 
-  // Reschedule (no immediate fetch) when poll interval changes
   watch(
     () => store.pollInterval,
     () => {
@@ -232,7 +213,7 @@ export function useBikes(opts?: { proxyBase?: string }) {
 
   onUnmounted(() => {
     clearTimers();
-    bikes.value = [];
+    allEntities.value = [];
   });
 
   return { bikes, loading, error, nextRefresh };
