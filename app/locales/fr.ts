@@ -21,7 +21,7 @@ export default {
       'Sur iOS, utilisez le bouton de partage de votre navigateur puis « Ajouter à l’écran d’accueil »',
   },
   onboardingModal: {
-    title: 'Bienvenue sur Bike Tracker',
+    title: 'Bienvenue sur Bikes Map',
     subtitle: 'Tous les opérateurs parisiens sur une seule carte en temps réel.',
     tip1: 'La carte affiche tous les véhicules Lime, Voi, Dott et Vélib disponibles, mis à jour en temps réel.',
     tip2: 'Appuyez sur \u00ab\u00a0Me localiser\u00a0\u00bb pour centrer la carte sur votre position et afficher les distances.',
@@ -31,7 +31,7 @@ export default {
     close: 'Fermer',
   },
   onboarding: {
-    title: 'Bike Tracker',
+    title: 'Bikes Map',
     subtitle:
       'Tous les opérateurs parisiens sur une seule carte : Lime, Voi, Dott et Vélib en temps réel.',
     useGps: 'Utiliser ma position GPS',
@@ -75,7 +75,7 @@ export default {
     s3: {
       title: '3. Objet et nature du service',
       content:
-        'Bike Tracker est une application web gratuite et non commerciale permettant de visualiser, en temps réel, la disponibilité de véhicules de mobilité douce (vélos, trottinettes électriques) et de stations de vélos en libre-service, à partir de flux de données publics au format GBFS.',
+        'Bikes Map est une application web gratuite et non commerciale permettant de visualiser, en temps réel, la disponibilité de véhicules de mobilité douce (vélos, trottinettes électriques) et de stations de vélos en libre-service, à partir de flux de données publics au format GBFS.',
     },
     s4: {
       title: "4. Service fourni \u00ab en l'état \u00bb (As Is)",
@@ -93,12 +93,12 @@ export default {
         'Les données de disponibilité des véhicules et des stations (nombre de vélos, de trottinettes, de places libres, niveaux de batterie\u2026) sont récupérées en temps réel auprès de {thirdParty} via des flux GBFS (General Bikeshare Feed Specification) publics, notamment ceux mis à disposition par les opérateurs Lime, Voi, Dott et Vélib Métropole.',
       thirdParty: 'sources tierces',
       content:
-        "Ces données sont la propriété exclusive de leurs émetteurs respectifs. L'éditeur de Bike Tracker n'exerce aucun contrôle sur leur exactitude, leur exhaustivité, leur fraîcheur ni leur disponibilité. En conséquence, l'éditeur ne saurait être tenu responsable de tout préjudice, direct ou indirect, résultant de l'utilisation ou de l'impossibilité d'utiliser ces données, ou de toute décision prise sur leur fondement (ex. : trajet inutile).",
+        "Ces données sont la propriété exclusive de leurs émetteurs respectifs. L'éditeur de Bikes Map n'exerce aucun contrôle sur leur exactitude, leur exhaustivité, leur fraîcheur ni leur disponibilité. En conséquence, l'éditeur ne saurait être tenu responsable de tout préjudice, direct ou indirect, résultant de l'utilisation ou de l'impossibilité d'utiliser ces données, ou de toute décision prise sur leur fondement (ex. : trajet inutile).",
     },
     s6: {
       title: '6. Utilisation non commerciale et informative',
       intro:
-        "Bike Tracker est destiné à un usage {strictlyPersonal}. Toute exploitation commerciale, redistribution ou intégration dans un produit ou service commercial est interdite sans accord écrit préalable de l'éditeur.",
+        "Bikes Map est destiné à un usage {strictlyPersonal}. Toute exploitation commerciale, redistribution ou intégration dans un produit ou service commercial est interdite sans accord écrit préalable de l'éditeur.",
       strictlyPersonal: 'strictement personnel, non commercial et informatif',
       content:
         "Les noms et marques des opérateurs mentionnés (Lime, Voi, Dott, Vélib, etc.) sont la propriété exclusive de leurs détenteurs respectifs. Leur mention dans l'application est purement informative et ne constitue en aucun cas un partenariat, une affiliation ou une approbation de la part desdits opérateurs.",
@@ -120,7 +120,7 @@ export default {
     s1: {
       title: '1. Principe général',
       content:
-        "Bike Tracker est conçu dans le respect de la vie privée de ses utilisateurs. L'application ne collecte aucune donnée personnelle identifiable. Aucun compte utilisateur n'est requis pour utiliser le service.",
+        "Bikes Map est conçu dans le respect de la vie privée de ses utilisateurs. L'application ne collecte aucune donnée personnelle identifiable. Aucun compte utilisateur n'est requis pour utiliser le service.",
     },
     s2: {
       title: '2. Géolocalisation',
@@ -142,7 +142,7 @@ export default {
     s4: {
       title: '4. Cookies et traceurs',
       intro:
-        "L'application {noCookies} (Google Analytics, Matomo, Facebook Pixel, etc.). Aucun outil de mesure d'audience n'est intégré dans Bike Tracker.",
+        "L'application {noCookies} (Google Analytics, Matomo, Facebook Pixel, etc.). Aucun outil de mesure d'audience n'est intégré dans Bikes Map.",
       noCookies: "n'utilise aucun cookie publicitaire ou de suivi",
     },
     s5: {
@@ -152,7 +152,7 @@ export default {
         "votre navigateur ne contacte jamais directement les API des opérateurs (Lime, Voi, Dott, Vélib). Les requêtes transitent par un serveur proxy dédié à l'application. Ce serveur ne transmet aucune donnée personnelle aux opérateurs.",
       mapLabel: 'Tuiles cartographiques :',
       mapContent:
-        "la carte utilise des tuiles fournies par des services tiers (OpenStreetMap / CARTO, Esri). Lors du chargement de la carte, votre navigateur se connecte à leurs serveurs CDN. Ces services peuvent enregistrer des métadonnées techniques (adresse IP, horodatage) conformément à leurs propres politiques de confidentialité. Bike Tracker n'a aucun contrôle sur ces traitements.",
+        "la carte utilise des tuiles fournies par des services tiers (OpenStreetMap / CARTO, Esri). Lors du chargement de la carte, votre navigateur se connecte à leurs serveurs CDN. Ces services peuvent enregistrer des métadonnées techniques (adresse IP, horodatage) conformément à leurs propres politiques de confidentialité. Bikes Map n'a aucun contrôle sur ces traitements.",
     },
     s6: {
       title: '6. Sécurité',

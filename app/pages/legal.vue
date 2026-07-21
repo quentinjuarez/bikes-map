@@ -141,7 +141,7 @@ import LanguageSwitcher from '../components/LanguageSwitcher.vue';
 
 const { t, locale } = useI18n();
 
-useHead({ title: 'Mentions légales et CGU | Bike Tracker' });
+useHead({ title: 'Mentions légales et CGU | Bikes Map' });
 
 const ownerName = 'Quentin Juarez';
 const ownerEmail = 'contact@quentinjuarez.dev';

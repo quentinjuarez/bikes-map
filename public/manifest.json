@@ -1,6 +1,6 @@
 {
-  "name": "Bike Tracker",
-  "short_name": "Bike Tracker",
+  "name": "Bikes Map",
+  "short_name": "Bikes Map",
   "description": "Carte temps réel des vélos et trottinettes disponibles près de vous — Lime, Voi, Dott, Vélib.",
   "start_url": "/",
   "scope": "/",

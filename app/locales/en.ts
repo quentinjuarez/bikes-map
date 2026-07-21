@@ -20,7 +20,7 @@ export default {
     androidHint: 'Tap \u22ee then "Add to Home Screen"',
   },
   onboardingModal: {
-    title: 'Welcome to Bike Tracker',
+    title: 'Welcome to Bikes Map',
     subtitle: 'All Paris bike operators on one live map.',
     tip1: 'The map shows all available Lime, Voi, Dott and Vélib vehicles updated in real time.',
     tip2: 'Tap the \u201cLocate me\u201d button to centre the map on your current position and get distances.',
@@ -30,7 +30,7 @@ export default {
     close: 'Close',
   },
   onboarding: {
-    title: 'Bike Tracker',
+    title: 'Bikes Map',
     subtitle: 'Every Paris bike operator on one map: Lime, Voi, Dott and Vélib in real time.',
     useGps: 'Use my GPS location',
     or: 'or enter manually',
@@ -73,7 +73,7 @@ export default {
     s3: {
       title: '3. Purpose of the Service',
       content:
-        'Bike Tracker is a free, non-commercial web application that provides real-time visibility of available micro-mobility vehicles (bikes, electric scooters) and docking stations, sourced from public GBFS data feeds.',
+        'Bikes Map is a free, non-commercial web application that provides real-time visibility of available micro-mobility vehicles (bikes, electric scooters) and docking stations, sourced from public GBFS data feeds.',
     },
     s4: {
       title: '4. Service Provided \u201cAs Is\u201d',
@@ -90,12 +90,12 @@ export default {
         'Vehicle and station availability data (number of bikes, scooters, docks, battery levels, etc.) is retrieved in real time from {thirdParty} via public GBFS (General Bikeshare Feed Specification) feeds provided by operators such as Lime, Voi, Dott and V\u00e9lib M\u00e9tropole.',
       thirdParty: 'third-party sources',
       content:
-        'This data is the exclusive property of its respective providers. The publisher of Bike Tracker has no control over its accuracy, completeness, freshness, or availability. Accordingly, the publisher shall not be liable for any direct or indirect loss arising from the use of, or inability to use, this data, or any decision made based on it (e.g. a wasted journey).',
+        'This data is the exclusive property of its respective providers. The publisher of Bikes Map has no control over its accuracy, completeness, freshness, or availability. Accordingly, the publisher shall not be liable for any direct or indirect loss arising from the use of, or inability to use, this data, or any decision made based on it (e.g. a wasted journey).',
     },
     s6: {
       title: '6. Non-Commercial and Informational Use',
       intro:
-        'Bike Tracker is intended for {strictlyPersonal}. Any commercial exploitation, redistribution, or integration into a commercial product or service is prohibited without prior written consent from the publisher.',
+        'Bikes Map is intended for {strictlyPersonal}. Any commercial exploitation, redistribution, or integration into a commercial product or service is prohibited without prior written consent from the publisher.',
       strictlyPersonal: 'strictly personal, non-commercial and informational use only',
       content:
         'The names and trademarks of operators mentioned (Lime, Voi, Dott, V\u00e9lib, etc.) are the exclusive property of their respective owners. Their mention in the application is purely informational and does not constitute a partnership, affiliation, or endorsement by those operators.',
@@ -117,7 +117,7 @@ export default {
     s1: {
       title: '1. General Principle',
       content:
-        'Bike Tracker is designed with user privacy in mind. The application does not collect any personally identifiable data. No user account is required to use the service.',
+        'Bikes Map is designed with user privacy in mind. The application does not collect any personally identifiable data. No user account is required to use the service.',
     },
     s2: {
       title: '2. Geolocation',
@@ -139,7 +139,7 @@ export default {
     s4: {
       title: '4. Cookies and Trackers',
       intro:
-        'The application {noCookies} (Google Analytics, Matomo, Facebook Pixel, etc.). No audience measurement tool is integrated into Bike Tracker.',
+        'The application {noCookies} (Google Analytics, Matomo, Facebook Pixel, etc.). No audience measurement tool is integrated into Bikes Map.',
       noCookies: 'does not use any advertising or tracking cookies',
     },
     s5: {
@@ -149,7 +149,7 @@ export default {
         'your browser never contacts operator APIs (Lime, Voi, Dott, V\u00e9lib) directly. Requests are routed through a dedicated server-side proxy. This proxy does not transmit any personal data to operators.',
       mapLabel: 'Map tiles:',
       mapContent:
-        'the map uses tiles provided by third-party services (OpenStreetMap / CARTO, Esri). When loading the map, your browser connects to their CDN servers. These services may log technical metadata (IP address, timestamp) in accordance with their own privacy policies. Bike Tracker has no control over these processes.',
+        'the map uses tiles provided by third-party services (OpenStreetMap / CARTO, Esri). When loading the map, your browser connects to their CDN servers. These services may log technical metadata (IP address, timestamp) in accordance with their own privacy policies. Bikes Map has no control over these processes.',
     },
     s6: {
       title: '6. Security',

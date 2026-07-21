@@ -1,10 +1,10 @@
 import tailwindcss from '@tailwindcss/vite';
 
 const SITE_URL = 'https://bikes.quentinjuarez.dev';
-const TITLE = 'Bike Tracker, tous les vélos de Paris';
+const TITLE = 'Bikes Map, tous les vélos de Paris';
 const DESCRIPTION =
   'Lime, Voi, Dott et Vélib réunis sur une seule carte en temps réel. Trouvez le vélo le plus proche en quelques secondes, où que vous soyez à Paris.';
-const OG_TITLE = 'Bike Tracker, tous les vélos de Paris sur une seule carte';
+const OG_TITLE = 'Bikes Map, tous les vélos de Paris sur une seule carte';
 const OG_DESCRIPTION =
   'Lime, Voi, Dott et Vélib réunis en temps réel. Trouvez le vélo le plus proche en quelques secondes, où que vous soyez à Paris.';
 
@@ -14,8 +14,8 @@ const jsonLd = {
     {
       '@type': ['WebApplication', 'MobileApplication'],
       '@id': `${SITE_URL}/#app`,
-      name: 'Bike Tracker',
-      alternateName: 'Bike Tracker Paris',
+      name: 'Bikes Map',
+      alternateName: 'Bikes Map Paris',
       url: SITE_URL,
       description: DESCRIPTION,
       applicationCategory: 'UtilitiesApplication',
@@ -112,7 +112,7 @@ export default defineNuxtConfig({
         { name: 'ICBM', content: '48.8566, 2.3522' },
         // Open Graph
         { property: 'og:type', content: 'website' },
-        { property: 'og:site_name', content: 'Bike Tracker' },
+        { property: 'og:site_name', content: 'Bikes Map' },
         { property: 'og:title', content: OG_TITLE },
         { property: 'og:description', content: OG_DESCRIPTION },
         { property: 'og:url', content: SITE_URL },
@@ -135,7 +135,7 @@ export default defineNuxtConfig({
           name: 'apple-mobile-web-app-status-bar-style',
           content: 'black-translucent',
         },
-        { name: 'apple-mobile-web-app-title', content: 'Bike Tracker' },
+        { name: 'apple-mobile-web-app-title', content: 'Bikes Map' },
       ],
       link: [
         { rel: 'canonical', href: SITE_URL },

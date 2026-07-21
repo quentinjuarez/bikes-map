@@ -1,4 +1,4 @@
-# Bike Tracker
+# Bikes Map
 
 Carte temps réel des vélos et trottinettes disponibles près de vous.
 Supporte **Lime**, **Voi**, **Dott** et les stations **Vélib Métropole** (Paris).

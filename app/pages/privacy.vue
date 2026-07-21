@@ -128,7 +128,7 @@ import LanguageSwitcher from '../components/LanguageSwitcher.vue';
 
 const { t, locale } = useI18n();
 
-useHead({ title: 'Politique de confidentialité | Bike Tracker' });
+useHead({ title: 'Politique de confidentialité | Bikes Map' });
 
 const ownerEmail = 'contact@quentinjuarez.dev';
 

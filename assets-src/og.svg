@@ -39,7 +39,7 @@
   <text x="472" y="243" fill="#60a5fa" font-size="26" font-weight="700"
         letter-spacing="6" font-family="SF Mono, Menlo, monospace">LIME / VOI / DOTT / VÉLIB</text>
 
-  <text x="470" y="345" fill="#ffffff" font-size="98" font-weight="800" letter-spacing="-2">Bike Tracker</text>
+  <text x="470" y="345" fill="#ffffff" font-size="98" font-weight="800" letter-spacing="-2">Bikes Map</text>
 
   <rect x="472" y="372" width="132" height="7" rx="3.5" fill="url(#bar)" />
 
