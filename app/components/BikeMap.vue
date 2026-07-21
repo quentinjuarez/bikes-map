@@ -4,8 +4,8 @@
       v-if="ready"
       :zoom="INIT_ZOOM"
       :center="initCenter"
-      :min-zoom="16"
-      :max-zoom="18"
+      :min-zoom="13"
+      :max-zoom="19"
       :use-global-leaflet="true"
       style="width: 100%; height: 100%"
       @ready="onMapReady"
@@ -92,8 +92,10 @@ const activeMarkers = new Map<string, { marker: L.Marker; entity: MapEntity }>()
 // light. Options favor render performance (chunked adds, off-screen culling).
 function createMarkerGroup(): L.MarkerClusterGroup {
   return L.markerClusterGroup({
-    maxClusterRadius: 46,
-    spiderfyOnMaxZoom: true,
+    // Fewer, cleaner clusters when zoomed out (large radius groups more into
+    // each bubble); every individual bike shows once zoomed in to 17+.
+    maxClusterRadius: 60,
+    disableClusteringAtZoom: 17,
     showCoverageOnHover: false,
     // displayEntities already limits markers to the viewport, so let
     // markercluster skip its own zoom animation and off-screen culling. Those
@@ -103,7 +105,7 @@ function createMarkerGroup(): L.MarkerClusterGroup {
     removeOutsideVisibleBounds: false,
     iconCreateFunction: (cluster) => {
       const n = cluster.getChildCount();
-      const size = n < 10 ? 34 : n < 50 ? 40 : 48;
+      const size = n < 10 ? 24 : n < 50 ? 28 : 32;
       return L.divIcon({
         html: `<div class="bike-cluster">${n}</div>`,
         className: 'bike-cluster-wrap',
@@ -498,7 +500,7 @@ watch(
   background: var(--color-accent-600);
   color: #fff;
   font:
-    700 13px/1 system-ui,
+    700 11px/1 system-ui,
     sans-serif;
   border: 2px solid var(--color-surface);
   box-shadow: var(--shadow-pop);
