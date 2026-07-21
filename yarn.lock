@@ -4442,9 +4442,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bike-tracker@workspace:.":
+"bikes-map@workspace:.":
   version: 0.0.0-use.local
-  resolution: "bike-tracker@workspace:."
+  resolution: "bikes-map@workspace:."
   dependencies:
     "@lucide/vue": ^1.25.0
     "@pinia/nuxt": ^0.11.2
