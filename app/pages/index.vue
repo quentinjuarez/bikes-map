@@ -139,7 +139,5 @@ watch(
   },
 );
 
-const { bikes, loading, error, nextRefresh } = useBikes({
-  proxyBase: import.meta.env.VITE_BACK_URL || 'http://localhost:13001',
-});
+const { bikes, loading, error, nextRefresh } = useBikes();
 </script>

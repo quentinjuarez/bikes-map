@@ -1,13 +1,8 @@
 <template>
-  <RouterView />
+  <NuxtPage />
 </template>
 
 <script setup lang="ts">
-import { onErrorCaptured } from 'vue';
-import { RouterView } from 'vue-router';
-
-import { useTheme } from './composables/useTheme';
-
 useTheme();
 
 // Global error boundary — catch Vue render/watcher errors so the app

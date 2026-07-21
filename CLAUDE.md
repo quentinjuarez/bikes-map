@@ -7,7 +7,7 @@
 
 ## This repo
 
-Mono repo with frontend and backend for a bike tracking app. The frontend is built with Vue 3 and TypeScript, while the backend is a Node.js server using Express. The project includes features like real-time bike location tracking, user location, and customizable settings.
+Single Nuxt 4 app (SSR disabled, client-only SPA) deployed on Vercel for a bike tracking app. Front is `app/` (Vue 3 + TS + Tailwind v4 + Pinia + vue-i18n + Leaflet, PWA); backend is Nitro server routes under `server/` that proxy and cache the GBFS feeds (Lime, Voi, Dott) and Vélib Métropole open data. Same-origin, so no CORS layer; Nitro cache replaces Redis. Features: real-time bike/scooter map, geolocation, filters, fr/en i18n, light/dark theme, embed view.
 
 ## Workflow rules
 

@@ -45,7 +45,8 @@ export function useBikes(opts?: { proxyBase?: string }) {
   const error = ref<string | null>(null);
   const nextRefresh = ref(0);
 
-  const proxyBase = opts?.proxyBase ?? '';
+  // Same-origin Nitro API. Callers pass nothing; overridable for tests.
+  const proxyBase = opts?.proxyBase ?? '/api';
 
   let fetchTimer: ReturnType<typeof setTimeout> | null = null;
   let countdownTimer: ReturnType<typeof setInterval> | null = null;

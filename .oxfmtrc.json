@@ -6,8 +6,8 @@
   "trailingComma": "all",
   "vueIndentScriptAndStyle": false,
   "sortTailwindcss": {
-    "stylesheet": "./src/style.css"
+    "stylesheet": "./app/assets/css/main.css"
   },
   "sortImports": true,
-  "ignorePatterns": ["dist/**", "node_modules/**"]
+  "ignorePatterns": ["dist/**", "node_modules/**", ".nuxt/**", ".output/**", ".vercel/**"]
 }

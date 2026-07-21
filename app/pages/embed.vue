@@ -44,7 +44,5 @@ const ok = applyQueryParams(window.location.search);
 const missingParams = ref(!ok);
 const ready = ref(ok); // gate BikeMap so it mounts with position already set
 
-const { bikes, error } = useBikes({
-  proxyBase: import.meta.env.VITE_BACK_URL || 'http://localhost:13001',
-});
+const { bikes, error } = useBikes();
 </script>
