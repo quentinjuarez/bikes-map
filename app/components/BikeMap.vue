@@ -6,7 +6,7 @@
       :center="initCenter"
       :min-zoom="16"
       :max-zoom="18"
-      :use-global-leaflet="false"
+      :use-global-leaflet="true"
       style="width: 100%; height: 100%"
       @ready="onMapReady"
     >
@@ -34,10 +34,19 @@
 <script setup lang="ts">
 import { LMap, LTileLayer, LMarker, LTooltip } from '@vue-leaflet/vue-leaflet';
 import L from 'leaflet';
+import 'leaflet.markercluster';
 import { computed, ref, watch, onMounted, onUnmounted, nextTick } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import 'leaflet/dist/leaflet.css';
+import 'leaflet.markercluster/dist/MarkerCluster.css';
+
+// Share one Leaflet instance: vue-leaflet reads window.L (use-global-leaflet),
+// and our markers + the markercluster plugin use the same L. Without this Vite
+// loads Leaflet twice and cross-instance Bounds/Point objects throw.
+if (import.meta.client) {
+  (window as unknown as { L: typeof L }).L = L;
+}
 import type { Bike, VelibStation, MapEntity, Provider } from '../composables/useBikes';
 import { theme } from '../composables/useTheme';
 
@@ -70,7 +79,7 @@ const ready = ref(false);
 
 // Plain (non-reactive) Leaflet references — never wrap Leaflet objects in Vue reactive
 let leafletMap: L.Map | null = null;
-let markersLayer: L.LayerGroup | null = null;
+let markersLayer: L.MarkerClusterGroup | null = null;
 let boundsTimer: ReturnType<typeof setTimeout> | null = null;
 
 // Reactive bounds: plain serialisable data, safe to be reactive
@@ -78,6 +87,31 @@ const mapBounds = ref<{ n: number; s: number; e: number; w: number } | null>(nul
 
 // Diff tracking — plain Map, not reactive
 const activeMarkers = new Map<string, { marker: L.Marker; entity: MapEntity }>();
+
+// Cluster group: groups nearby vehicles so the dense z16 view stays readable and
+// light. Options favor render performance (chunked adds, off-screen culling).
+function createMarkerGroup(): L.MarkerClusterGroup {
+  return L.markerClusterGroup({
+    maxClusterRadius: 46,
+    spiderfyOnMaxZoom: true,
+    showCoverageOnHover: false,
+    // displayEntities already limits markers to the viewport, so let
+    // markercluster skip its own zoom animation and off-screen culling. Those
+    // race with our moveend-driven diff (throwing in _recursively) and add work
+    // we do not need. Disabling them is both robust and faster.
+    animate: false,
+    removeOutsideVisibleBounds: false,
+    iconCreateFunction: (cluster) => {
+      const n = cluster.getChildCount();
+      const size = n < 10 ? 34 : n < 50 ? 40 : 48;
+      return L.divIcon({
+        html: `<div class="bike-cluster">${n}</div>`,
+        className: 'bike-cluster-wrap',
+        iconSize: L.point(size, size),
+      });
+    },
+  });
+}
 
 onMounted(() => {
   nextTick(() => {
@@ -113,7 +147,7 @@ function onMapReady(map: L.Map) {
   leafletMap = map;
   // Move zoom control out from under the provider chips (top-left).
   map.zoomControl?.setPosition('bottomleft');
-  markersLayer = L.layerGroup().addTo(map);
+  markersLayer = createMarkerGroup().addTo(map);
 
   // If position is already known (persisted session), center immediately
   // The watch won't fire in this case since the props didn't change after setup
@@ -343,8 +377,7 @@ function tooltipHtml(entity: MapEntity): string {
 // Only adds/removes/updates markers that actually changed.
 // Stable markers never get destroyed → no flicker during pan/zoom.
 
-function addMarker(entity: MapEntity, isDark: boolean, animate = false) {
-  if (!markersLayer) return;
+function buildMarker(entity: MapEntity, isDark: boolean, animate = false): L.Marker {
   const icon =
     entity.kind === 'bike'
       ? bikeIcon(entity, isDark, animate)
@@ -353,16 +386,16 @@ function addMarker(entity: MapEntity, isDark: boolean, animate = false) {
     sticky: true,
     interactive: false,
   });
-  markersLayer.addLayer(marker);
   activeMarkers.set(entityKey(entity), { marker, entity });
+  return marker;
 }
 
 function rebuildMarkers(entities: MapEntity[], isDark: boolean) {
   if (!leafletMap) return;
   activeMarkers.clear();
-  // Abandon the broken layer group entirely — map.removeLayer(group) removes
-  // the container as a unit without iterating children, so it never triggers
-  // the _leaflet_events crash that clearLayers() causes with dual instances.
+  // Abandon the broken group entirely; map.removeLayer(group) removes the
+  // container as a unit without iterating children, so it never triggers the
+  // _leaflet_events crash that clearLayers() causes with dual instances.
   if (markersLayer) {
     try {
       leafletMap.removeLayer(markersLayer);
@@ -370,10 +403,9 @@ function rebuildMarkers(entities: MapEntity[], isDark: boolean) {
       /* ignore detached group */
     }
   }
-  markersLayer = L.layerGroup().addTo(leafletMap);
-  for (const entity of entities) {
-    addMarker(entity, isDark, false);
-  }
+  markersLayer = createMarkerGroup().addTo(leafletMap);
+  // Bulk add so the cluster group indexes everything in one pass.
+  markersLayer.addLayers(entities.map((e) => buildMarker(e, isDark, false)));
 }
 
 watch(displayEntities, (entities) => {
@@ -384,28 +416,32 @@ watch(displayEntities, (entities) => {
   const nextMap = new Map<string, MapEntity>();
   for (const e of entities) nextMap.set(entityKey(e), e);
 
-  // Remove markers that left the viewport — if Leaflet throws (dual-instance
-  // _leaflet_events bug), nuke the whole layer and rebuild from scratch
+  // Batch removals into a single cluster recompute. If Leaflet throws
+  // (dual-instance _leaflet_events bug), nuke the group and rebuild.
+  const toRemove: L.Marker[] = [];
   for (const [key, { marker }] of activeMarkers) {
     if (!nextMap.has(key)) {
-      try {
-        markersLayer.removeLayer(marker);
-      } catch {
-        rebuildMarkers(entities, isDark);
-        return;
-      }
+      toRemove.push(marker);
       activeMarkers.delete(key);
     }
   }
+  if (toRemove.length) {
+    try {
+      markersLayer.removeLayers(toRemove);
+    } catch {
+      rebuildMarkers(entities, isDark);
+      return;
+    }
+  }
 
-  // Add new / update changed markers
+  // Build new markers, update changed ones in place, then bulk-add the new ones.
+  const toAdd: L.Marker[] = [];
   for (const [key, entity] of nextMap) {
     const existing = activeMarkers.get(key);
 
     if (!existing) {
-      addMarker(entity, isDark, true);
+      toAdd.push(buildMarker(entity, isDark, true));
     } else if (!entitiesEqual(existing.entity, entity)) {
-      // Data changed — update in place without destroying the marker
       if (existing.entity.lat !== entity.lat || existing.entity.lon !== entity.lon) {
         existing.marker.setLatLng([entity.lat, entity.lon]);
       }
@@ -416,6 +452,7 @@ watch(displayEntities, (entities) => {
       activeMarkers.set(key, { marker: existing.marker, entity });
     }
   }
+  if (toAdd.length) markersLayer.addLayers(toAdd);
 });
 
 // Theme change: re-render icons in place (no add/remove)
@@ -445,6 +482,26 @@ watch(
   to {
     opacity: 1;
   }
+}
+
+/* Marker clusters */
+:deep(.bike-cluster-wrap) {
+  background: transparent;
+}
+:deep(.bike-cluster) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 9999px;
+  background: var(--color-accent-600);
+  color: #fff;
+  font:
+    700 13px/1 system-ui,
+    sans-serif;
+  border: 2px solid var(--color-surface);
+  box-shadow: var(--shadow-pop);
 }
 
 /* Leaflet zoom controls */
