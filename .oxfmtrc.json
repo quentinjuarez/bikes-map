@@ -1,0 +1,13 @@
+{
+  "singleQuote": true,
+  "semi": true,
+  "printWidth": 100,
+  "tabWidth": 2,
+  "trailingComma": "all",
+  "vueIndentScriptAndStyle": false,
+  "sortTailwindcss": {
+    "stylesheet": "./app/assets/css/main.css"
+  },
+  "sortImports": true,
+  "ignorePatterns": ["dist/**", "node_modules/**", ".nuxt/**", ".output/**", ".vercel/**"]
+}

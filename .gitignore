@@ -10,3 +10,10 @@ coverage/
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
+
+# Nuxt
+.nuxt/
+.output/
+.data/
+.nitro/
+.vercel/

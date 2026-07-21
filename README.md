@@ -15,13 +15,26 @@ Supporte **Lime**, **Voi**, **Dott** et les stations **Vélib Métropole** (Pari
 
 ## Architecture
 
+Application **Nuxt 4** unique (SSR désactivé, SPA client), déployée sur **Vercel**.
+
 ```
-front/   → Vue 3 + Vite + Tailwind CSS (PWA)
-back/    → Express 5 proxy – agrège les flux GBFS et les données Vélib
+app/      → front Vue 3 + Tailwind CSS v4 + Pinia + vue-i18n + Leaflet (PWA)
+server/   → routes API Nitro – agrègent les flux GBFS et les données Vélib
 ```
 
-Le proxy backend est nécessaire pour contourner les restrictions CORS des API tierces.
+Le front et l'API partagent la même origine : plus de restrictions CORS, et le
+cache Nitro (`defineCachedEventHandler`) remplace Redis.
 **Aucune donnée utilisateur n'est collectée ni stockée côté serveur.**
+
+## Développement
+
+```
+yarn install
+yarn dev        # http://localhost:3000
+yarn test       # vitest
+yarn lint       # oxlint
+yarn build      # build Vercel
+```
 
 ## Sources de données
 

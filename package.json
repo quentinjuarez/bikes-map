@@ -1,16 +1,42 @@
 {
   "name": "bike-tracker",
+  "version": "1.0.0",
   "private": true,
-  "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "yarn workspace bike-tracker-front dev & yarn workspace bike-tracker-back dev",
-    "dev:frontend": "yarn workspace bike-tracker-front dev",
-    "dev:backend": "yarn workspace bike-tracker-back dev"
+    "dev": "nuxt dev",
+    "build": "nuxt build",
+    "preview": "nuxt preview",
+    "generate": "nuxt generate",
+    "postinstall": "nuxt prepare",
+    "typecheck": "nuxt typecheck",
+    "lint": "oxlint .",
+    "format": "oxfmt .",
+    "format:check": "oxfmt . --check",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "assets": "node scripts/generate-assets.mjs"
   },
-  "packageManager": "yarn@3.8.6",
-  "workspaces": [
-    "./front",
-    "./back"
-  ]
+  "dependencies": {
+    "@lucide/vue": "^1.25.0",
+    "@pinia/nuxt": "^0.11.2",
+    "@tailwindcss/vite": "^4.2.2",
+    "@vue-leaflet/vue-leaflet": "^0.10.1",
+    "leaflet": "^1.9.4",
+    "nuxt": "^4.5.0",
+    "pinia": "^3.0.4",
+    "pinia-plugin-persistedstate": "^4.7.1",
+    "tailwindcss": "^4.2.2",
+    "vue-i18n": "^11.3.0"
+  },
+  "devDependencies": {
+    "@types/leaflet": "^1.9.21",
+    "oxfmt": "^0.44.0",
+    "oxlint": "^1.59.0",
+    "sharp": "^0.35.3",
+    "typescript": "^6.0.2",
+    "vitest": "^4.0.18",
+    "vue-tsc": "^3.2.6"
+  },
+  "packageManager": "yarn@3.8.6"
 }
