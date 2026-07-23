@@ -28,10 +28,40 @@
         </l-tooltip>
       </l-marker>
     </l-map>
+
+    <!-- Walking-route summary -->
+    <div
+      v-if="route"
+      class="absolute bottom-6 left-1/2 z-1000 flex -translate-x-1/2 items-center gap-2 rounded-full border border-line bg-surface px-3 py-1.5 text-sm font-medium text-fg shadow-pop"
+    >
+      <Footprints :size="16" class="flex-none text-accent-600 dark:text-accent-400" />
+      {{
+        t('bikeMap.routeSummary', {
+          min: Math.max(1, Math.round(route.duration / 60)),
+          dist: formatDistance(route.distance),
+        })
+      }}
+      <button
+        class="ml-1 rounded-full p-0.5 text-muted transition-colors hover:text-fg"
+        :aria-label="t('onboardingModal.close')"
+        @click="clearRoute"
+      >
+        <X :size="14" />
+      </button>
+    </div>
+
+    <!-- Transient notice (locate-first / route error) -->
+    <div
+      v-if="notice"
+      class="absolute bottom-6 left-1/2 z-1000 -translate-x-1/2 rounded-full border border-line bg-surface px-3 py-1.5 text-sm text-muted shadow-pop"
+    >
+      {{ notice }}
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { Footprints, X } from '@lucide/vue';
 import { LMap, LTileLayer, LMarker, LTooltip } from '@vue-leaflet/vue-leaflet';
 import L from 'leaflet';
 import 'leaflet.markercluster';
@@ -89,6 +119,12 @@ const mapBounds = ref<{ n: number; s: number; e: number; w: number } | null>(nul
 // Diff tracking — plain Map, not reactive
 const activeMarkers = new Map<string, { marker: L.Marker; entity: MapEntity }>();
 
+// Selected-bike walking route (drawn on the map; summary shown in a chip).
+let routeLayer: L.Polyline | null = null;
+let noticeTimer: ReturnType<typeof setTimeout> | null = null;
+const route = ref<{ distance: number; duration: number } | null>(null);
+const notice = ref<string | null>(null);
+
 // Cluster group: groups nearby vehicles so the dense z16 view stays readable and
 // light. Options favor render performance (chunked adds, off-screen culling).
 function createMarkerGroup(): L.MarkerClusterGroup {
@@ -116,6 +152,62 @@ function createMarkerGroup(): L.MarkerClusterGroup {
   });
 }
 
+// ── Selected-bike walking route ──────────────────────────────────────
+function routeColor() {
+  return theme.value === 'dark' ? '#60a5fa' : '#2563eb';
+}
+
+function clearRoute() {
+  if (routeLayer && leafletMap) {
+    try {
+      leafletMap.removeLayer(routeLayer);
+    } catch {
+      /* already detached */
+    }
+  }
+  routeLayer = null;
+  route.value = null;
+}
+
+function showNotice(msg: string) {
+  notice.value = msg;
+  if (noticeTimer) clearTimeout(noticeTimer);
+  noticeTimer = setTimeout(() => (notice.value = null), 3000);
+}
+
+async function selectEntity(entity: MapEntity) {
+  if (props.userLat == null || props.userLng == null) {
+    showNotice(t('bikeMap.locateFirst'));
+    return;
+  }
+  try {
+    const data = await $fetch<{ geometry: [number, number][]; distance: number; duration: number }>(
+      '/api/route',
+      {
+        params: {
+          fromLat: props.userLat,
+          fromLng: props.userLng,
+          toLat: entity.lat,
+          toLng: entity.lon,
+        },
+      },
+    );
+    clearRoute();
+    if (leafletMap) {
+      routeLayer = L.polyline(data.geometry, {
+        color: routeColor(),
+        weight: 5,
+        opacity: 0.85,
+        lineCap: 'round',
+        lineJoin: 'round',
+      }).addTo(leafletMap);
+    }
+    route.value = { distance: data.distance, duration: data.duration };
+  } catch {
+    showNotice(t('bikeMap.routeError'));
+  }
+}
+
 onMounted(() => {
   nextTick(() => {
     ready.value = true;
@@ -124,6 +216,8 @@ onMounted(() => {
 
 onUnmounted(() => {
   if (boundsTimer) clearTimeout(boundsTimer);
+  if (noticeTimer) clearTimeout(noticeTimer);
+  clearRoute();
   activeMarkers.clear();
   if (markersLayer && leafletMap) {
     try {
@@ -154,6 +248,8 @@ function onMapReady(map: L.Map) {
   map.on('dragstart', () => {
     following.value = false;
   });
+  // Tapping empty map clears any drawn route.
+  map.on('click', () => clearRoute());
   markersLayer = createMarkerGroup().addTo(map);
 
   // If position is already known (persisted session), center immediately
@@ -397,6 +493,7 @@ function buildMarker(entity: MapEntity, isDark: boolean, animate = false): L.Mar
     sticky: true,
     interactive: false,
   });
+  marker.on('click', () => selectEntity(entity));
   activeMarkers.set(entityKey(entity), { marker, entity });
   return marker;
 }

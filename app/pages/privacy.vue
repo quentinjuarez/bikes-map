@@ -95,6 +95,10 @@
           <strong>{{ t('privacy.s5.mapLabel') }}</strong>
           {{ t('privacy.s5.mapContent') }}
         </p>
+        <p class="text-sm leading-relaxed text-muted">
+          <strong>{{ t('privacy.s5.routeLabel') }}</strong>
+          {{ t('privacy.s5.routeContent') }}
+        </p>
       </section>
 
       <!-- 6. Security -->

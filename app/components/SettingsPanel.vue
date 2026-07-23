@@ -71,6 +71,37 @@
           <section class="space-y-3">
             <h3 class="text-sm font-semibold text-fg">{{ t('settings.location') }}</h3>
 
+            <!-- Address / place search -->
+            <div class="relative">
+              <BaseInput
+                v-model="searchQuery"
+                size="sm"
+                type="text"
+                :placeholder="t('geo.searchPlaceholder')"
+                class="w-full"
+                @input="onSearchInput"
+              />
+              <ul
+                v-if="searchResults.length"
+                class="absolute z-10 mt-1 max-h-56 w-full overflow-y-auto rounded-xl border border-line bg-surface shadow-pop"
+              >
+                <li v-for="r in searchResults" :key="`${r.lat},${r.lng}`">
+                  <button
+                    class="block w-full truncate px-3 py-2 text-left text-sm text-fg transition-colors hover:bg-surface-2"
+                    @click="pickResult(r)"
+                  >
+                    {{ r.label }}
+                  </button>
+                </li>
+              </ul>
+              <p
+                v-else-if="searched && !searching && searchQuery.trim().length >= 3"
+                class="mt-1 text-xs text-muted"
+              >
+                {{ t('geo.noResults') }}
+              </p>
+            </div>
+
             <div class="flex flex-wrap items-center justify-between gap-2">
               <div
                 v-if="store.hasPosition"
@@ -207,10 +238,55 @@ function submitManual() {
   locationRaw.value = '';
 }
 
+// ── Address / place search (BAN geocoder via /api/geocode) ───────────
+interface GeoResult {
+  label: string;
+  lat: number;
+  lng: number;
+}
+const searchQuery = ref('');
+const searchResults = ref<GeoResult[]>([]);
+const searching = ref(false);
+const searched = ref(false);
+let searchTimer: ReturnType<typeof setTimeout> | null = null;
+
+function onSearchInput() {
+  if (searchTimer) clearTimeout(searchTimer);
+  const q = searchQuery.value.trim();
+  if (q.length < 3) {
+    searchResults.value = [];
+    searched.value = false;
+    return;
+  }
+  searchTimer = setTimeout(async () => {
+    searching.value = true;
+    try {
+      searchResults.value = await $fetch<GeoResult[]>('/api/geocode', { params: { q } });
+    } catch {
+      searchResults.value = [];
+    } finally {
+      searching.value = false;
+      searched.value = true;
+    }
+  }, 250);
+}
+
+function pickResult(r: GeoResult) {
+  store.setPosition(r.lat, r.lng, 'manual');
+  searchQuery.value = '';
+  searchResults.value = [];
+  searched.value = false;
+}
+
 watch(
   () => props.open,
   (open) => {
-    if (!open) locationRaw.value = '';
+    if (!open) {
+      locationRaw.value = '';
+      searchQuery.value = '';
+      searchResults.value = [];
+      searched.value = false;
+    }
   },
 );
 

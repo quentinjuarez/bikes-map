@@ -51,6 +51,9 @@ export default {
     num_bikes_available: '{n} vélo disponible | {n} vélos disponibles',
     mechanical: '{n} mécanique | {n} mécaniques',
     ebike: '{n} électrique | {n} électriques',
+    routeSummary: '{min} min à pied ({dist})',
+    routeError: 'Itinéraire introuvable',
+    locateFirst: 'Définissez votre position pour voir l’itinéraire',
   },
   footer: {
     legal: 'Mentions légales & CGU',
@@ -127,9 +130,9 @@ export default {
       intro:
         "L'application peut demander l'accès à la géolocalisation de votre appareil, uniquement si vous l'autorisez explicitement. Cette donnée sert {solelyToCentre}.",
       solelyToCentre: 'exclusivement à centrer la carte sur votre position',
-      p2: "Le traitement de votre position géographique s'effectue à {locally}, directement dans votre navigateur. Vos coordonnées GPS ne sont {neverSent}, ni stockées à distance, ni transmises à un tiers.",
+      p2: "Le traitement de votre position géographique s'effectue à {locally}, directement dans votre navigateur. Vos coordonnées GPS ne sont {neverSent}, ni stockées à distance, ni transmises à un tiers, sauf lorsque vous demandez un itinéraire à pied (voir section 5).",
       locally: '100\u00a0% en local',
-      neverSent: 'jamais envoyées à un serveur',
+      neverSent: 'pas envoyées à un serveur',
     },
     s3: {
       title: '3. Données stockées localement',
@@ -153,6 +156,9 @@ export default {
       mapLabel: 'Tuiles cartographiques :',
       mapContent:
         "la carte utilise des tuiles fournies par des services tiers (OpenStreetMap / CARTO, Esri). Lors du chargement de la carte, votre navigateur se connecte à leurs serveurs CDN. Ces services peuvent enregistrer des métadonnées techniques (adresse IP, horodatage) conformément à leurs propres politiques de confidentialité. Bikes Map n'a aucun contrôle sur ces traitements.",
+      routeLabel: 'Itinéraires à pied :',
+      routeContent:
+        "lorsque vous touchez un véhicule pour afficher l'itinéraire à pied, votre position et la position du véhicule sont envoyées via le proxy à un service de calcul d'itinéraire. Aucune autre donnée n'est partagée, et les itinéraires sont mis en cache sans vous identifier.",
     },
     s6: {
       title: '6. Sécurité',
@@ -166,6 +172,8 @@ export default {
     },
   },
   geo: {
+    searchPlaceholder: 'Rechercher une adresse ou un lieu',
+    noResults: 'Aucun résultat',
     enterManually: 'Définir manuellement',
     cancel: 'Annuler',
     placeholder: '48.8566, 2.3522 ou lien Google Maps',

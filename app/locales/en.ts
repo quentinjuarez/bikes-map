@@ -49,6 +49,9 @@ export default {
     num_bikes_available: '{n} bike available | {n} bikes available',
     mechanical: '{n} mechanical | {n} mechanicals',
     ebike: '{n} electric | {n} electrics',
+    routeSummary: '{min} min walk ({dist})',
+    routeError: 'Could not find a route',
+    locateFirst: 'Set your location to see the route',
   },
   footer: {
     legal: 'Legal Notice & ToS',
@@ -124,9 +127,9 @@ export default {
       intro:
         "The application may request access to your device's location, only if you explicitly grant permission. This data is used {solelyToCentre}.",
       solelyToCentre: 'solely to centre the map on your position',
-      p2: 'Your geographic location is processed {locally}, directly in your browser. Your GPS coordinates are {neverSent}, stored remotely, or shared with any third party.',
+      p2: 'Your geographic location is processed {locally}, directly in your browser. Your GPS coordinates are {neverSent}, stored remotely, or shared, except when you request a walking route (see section 5).',
       locally: '100% locally',
-      neverSent: 'never sent to any server',
+      neverSent: 'not sent to a server',
     },
     s3: {
       title: '3. Locally Stored Data',
@@ -150,6 +153,9 @@ export default {
       mapLabel: 'Map tiles:',
       mapContent:
         'the map uses tiles provided by third-party services (OpenStreetMap / CARTO, Esri). When loading the map, your browser connects to their CDN servers. These services may log technical metadata (IP address, timestamp) in accordance with their own privacy policies. Bikes Map has no control over these processes.',
+      routeLabel: 'Walking routes:',
+      routeContent:
+        'when you tap a vehicle to display the walking route, your position and the vehicle location are sent through the proxy to a routing service to compute the path. Nothing else is shared, and routes are cached without identifying you.',
     },
     s6: {
       title: '6. Security',
@@ -163,6 +169,8 @@ export default {
     },
   },
   geo: {
+    searchPlaceholder: 'Search an address or place',
+    noResults: 'No results',
     enterManually: 'Set location manually',
     cancel: 'Cancel',
     placeholder: '48.8566, 2.3522 or Google Maps link',
