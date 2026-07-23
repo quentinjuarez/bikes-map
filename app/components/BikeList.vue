@@ -146,7 +146,9 @@ watch(
         ro = new ResizeObserver(() => {
           containerHeight.value = scrollEl.value?.clientHeight ?? 0;
         });
-        ro.observe(scrollEl.value);
+        // double-cast: a duplicate DOM lib makes HTMLElement and Element read as
+        // distinct here (vue-tsc quirk); the value is a real element at runtime.
+        ro.observe(scrollEl.value as unknown as Element);
       });
     } else {
       ro?.disconnect();

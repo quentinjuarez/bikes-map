@@ -1,17 +1,18 @@
-import { VELIB_BASE, parseVelibStations } from '~~/server/utils/gbfs';
+import { VELIB_BASE, parseVelibStations, type ParsedStation } from '~~/server/utils/gbfs';
 
 // station_information rarely changes → cache 1h. status is live → 30s (below).
+// Explicit return annotations avoid Nitro's typed-$fetch self-referential inference.
 const getVelibInfo = defineCachedFunction(
-  async () => $fetch(`${VELIB_BASE}/station_information.json`),
+  async (): Promise<unknown> => $fetch<unknown>(`${VELIB_BASE}/station_information.json`),
   { maxAge: 3600, name: 'velib_info', getKey: () => 'velib_info' },
 );
 
 // GET /api/velib/stations
 export default defineCachedEventHandler(
-  async () => {
+  async (): Promise<{ stations: ParsedStation[] }> => {
     const [infoData, statusData] = await Promise.all([
       getVelibInfo(),
-      $fetch(`${VELIB_BASE}/station_status.json`),
+      $fetch<unknown>(`${VELIB_BASE}/station_status.json`),
     ]);
     return { stations: parseVelibStations(infoData as never, statusData as never) };
   },

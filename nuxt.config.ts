@@ -161,6 +161,13 @@ export default defineNuxtConfig({
         'Referrer-Policy': 'no-referrer',
       },
     },
+    // Let the CDN serve repeat API hits from the edge (cuts function invocations
+    // and upstream load); each route still has its own Nitro cache TTL.
+    '/api/**': {
+      headers: {
+        'cache-control': 's-maxage=30, stale-while-revalidate=60',
+      },
+    },
   },
 
   nitro: {
