@@ -5,7 +5,7 @@
       :zoom="INIT_ZOOM"
       :center="initCenter"
       :min-zoom="13"
-      :max-zoom="19"
+      :max-zoom="18"
       :use-global-leaflet="true"
       style="width: 100%; height: 100%"
       @ready="onMapReady"
