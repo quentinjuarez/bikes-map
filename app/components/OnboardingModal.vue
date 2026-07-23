@@ -1,32 +1,33 @@
 <template>
   <Teleport to="body">
     <div
-      class="fixed inset-0 z-3000 flex items-end justify-center bg-black/40 p-4 sm:items-center"
+      class="fixed inset-x-0 top-0 z-3000 flex h-dvh items-end justify-center bg-black/40 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:items-center"
       @click.self="emit('close')"
     >
       <div
         :style="drag.style"
-        v-on="drag.handlers"
-        class="w-full max-w-sm touch-none space-y-5 rounded-2xl border border-line bg-surface p-6 shadow-pop md:touch-auto"
+        class="flex max-h-full w-full max-w-sm flex-col overflow-hidden rounded-2xl border border-line bg-surface shadow-pop"
       >
-        <div class="mx-auto -mt-2 h-1 w-9 rounded-full bg-line md:hidden" aria-hidden="true" />
-        <!-- Header -->
-        <div class="flex items-start justify-between gap-4">
-          <div>
-            <h2 class="text-base font-semibold text-fg">{{ t('onboardingModal.title') }}</h2>
-            <p class="mt-1 text-xs text-muted">{{ t('onboardingModal.subtitle') }}</p>
+        <!-- Header (also the mobile swipe-to-dismiss zone) -->
+        <div v-on="drag.handlers" class="flex-none touch-none px-6 pt-4 md:touch-auto">
+          <div class="mx-auto mb-3 h-1 w-9 rounded-full bg-line md:hidden" aria-hidden="true" />
+          <div class="flex items-start justify-between gap-4">
+            <div>
+              <h2 class="text-base font-semibold text-fg">{{ t('onboardingModal.title') }}</h2>
+              <p class="mt-1 text-xs text-muted">{{ t('onboardingModal.subtitle') }}</p>
+            </div>
+            <button
+              class="mt-0.5 flex-none rounded-lg p-1 text-muted transition-colors hover:bg-surface-2 hover:text-fg focus-visible:ring-2 focus-visible:ring-accent-500/50 focus-visible:outline-none"
+              :aria-label="t('onboardingModal.close')"
+              @click="emit('close')"
+            >
+              <X :size="18" />
+            </button>
           </div>
-          <button
-            class="mt-0.5 flex-none rounded-lg p-1 text-muted transition-colors hover:bg-surface-2 hover:text-fg focus-visible:ring-2 focus-visible:ring-accent-500/50 focus-visible:outline-none"
-            :aria-label="t('onboardingModal.close')"
-            @click="emit('close')"
-          >
-            <X :size="18" />
-          </button>
         </div>
 
-        <!-- Tips -->
-        <ul class="space-y-3">
+        <!-- Tips (scrolls if the viewport is short) -->
+        <ul class="flex-1 space-y-3 overflow-y-auto px-6 py-4">
           <li v-for="tip in tips" :key="tip.key" class="flex items-start gap-3">
             <component
               :is="tip.icon"
@@ -38,9 +39,11 @@
         </ul>
 
         <!-- CTA -->
-        <BaseButton class="w-full" size="md" @click="emit('close')">
-          {{ t('onboardingModal.cta') }}
-        </BaseButton>
+        <div class="flex-none px-6 pt-2 pb-6">
+          <BaseButton class="w-full" size="md" @click="emit('close')">
+            {{ t('onboardingModal.cta') }}
+          </BaseButton>
+        </div>
       </div>
     </div>
   </Teleport>

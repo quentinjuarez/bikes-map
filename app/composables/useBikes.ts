@@ -25,7 +25,6 @@ interface RawVelibStation {
 
 // Re-export for convenience
 export type { Bike, VelibStation, MapEntity, Provider } from '../types';
-export { haversineDistance } from '../utils/geo';
 
 const PARIS = { lat: 48.8566, lng: 2.3522 };
 
