@@ -6,18 +6,22 @@
     <Transition name="slide">
       <div
         v-if="open"
+        :style="drag.style"
         class="fixed inset-x-0 bottom-0 z-2001 flex max-h-[85dvh] flex-col overflow-hidden rounded-t-2xl border-t border-line bg-surface text-fg shadow-sheet md:inset-y-0 md:right-0 md:left-auto md:h-full md:max-h-none md:w-[min(28rem,100%)] md:rounded-none md:border-t-0 md:border-l"
       >
-        <!-- Header -->
-        <div class="flex flex-none items-center justify-between border-b border-line px-6 py-4">
-          <h2 class="text-base font-semibold">{{ t('settings.title') }}</h2>
-          <button
-            class="rounded-lg p-1.5 text-muted transition-colors hover:bg-surface-2 hover:text-fg focus-visible:ring-2 focus-visible:ring-accent-500/50 focus-visible:outline-none"
-            :aria-label="t('settings.done')"
-            @click="emit('close')"
-          >
-            <X :size="20" />
-          </button>
+        <!-- Header (also the mobile swipe-to-dismiss zone) -->
+        <div v-on="drag.handlers" class="flex-none touch-none">
+          <div class="mx-auto mt-2 h-1 w-9 rounded-full bg-line md:hidden" aria-hidden="true" />
+          <div class="flex items-center justify-between border-b border-line px-6 py-4">
+            <h2 class="text-base font-semibold">{{ t('settings.title') }}</h2>
+            <button
+              class="rounded-lg p-1.5 text-muted transition-colors hover:bg-surface-2 hover:text-fg focus-visible:ring-2 focus-visible:ring-accent-500/50 focus-visible:outline-none"
+              :aria-label="t('settings.done')"
+              @click="emit('close')"
+            >
+              <X :size="20" />
+            </button>
+          </div>
         </div>
 
         <!-- Scrollable body -->
@@ -169,6 +173,7 @@ import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import { useGeolocation } from '../composables/useGeolocation';
+import { useSwipeDismiss } from '../composables/useSwipeDismiss';
 import { useProfileStore } from '../stores/profile';
 import { ALL_PROVIDERS, FILTER_BOUNDS, UNSET } from '../types';
 import { parseLocation } from '../utils/parseLocation';
@@ -182,6 +187,8 @@ import SpinnerIcon from './SpinnerIcon.vue';
 
 const props = defineProps<{ open: boolean }>();
 const emit = defineEmits<{ close: [] }>();
+
+const drag = useSwipeDismiss(() => emit('close'));
 
 const store = useProfileStore();
 const { t } = useI18n();

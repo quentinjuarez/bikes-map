@@ -5,8 +5,11 @@
       @click.self="emit('close')"
     >
       <div
-        class="w-full max-w-sm space-y-5 rounded-2xl border border-line bg-surface p-6 shadow-pop"
+        :style="drag.style"
+        v-on="drag.handlers"
+        class="w-full max-w-sm touch-none space-y-5 rounded-2xl border border-line bg-surface p-6 shadow-pop md:touch-auto"
       >
+        <div class="mx-auto -mt-2 h-1 w-9 rounded-full bg-line md:hidden" aria-hidden="true" />
         <!-- Header -->
         <div class="flex items-start justify-between gap-4">
           <div>
@@ -47,10 +50,13 @@
 import { LocateFixed, Map as MapIcon, MousePointerClick, SlidersHorizontal, X } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
 
+import { useSwipeDismiss } from '../composables/useSwipeDismiss';
 import BaseButton from './BaseButton.vue';
 
 const emit = defineEmits<{ close: [] }>();
 const { t } = useI18n();
+
+const drag = useSwipeDismiss(() => emit('close'));
 
 const tips = [
   { icon: MapIcon, key: 'onboardingModal.tip1' },

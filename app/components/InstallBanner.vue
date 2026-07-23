@@ -13,8 +13,14 @@
         class="fixed right-0 bottom-0 left-0 z-2000 p-4 pb-[max(1rem,env(safe-area-inset-bottom))]"
       >
         <div
-          class="mx-auto w-full max-w-sm rounded-2xl border border-line bg-surface p-4 shadow-pop"
+          :style="drag.style"
+          v-on="drag.handlers"
+          class="mx-auto w-full max-w-sm touch-none rounded-2xl border border-line bg-surface p-4 shadow-pop md:touch-auto"
         >
+          <div
+            class="mx-auto -mt-1 mb-2 h-1 w-9 rounded-full bg-line md:hidden"
+            aria-hidden="true"
+          />
           <div class="flex items-start gap-3">
             <!-- Text -->
             <div class="min-w-0 flex-1">
@@ -49,12 +55,15 @@ import { X } from '@lucide/vue';
 import { ref, onMounted, onBeforeUnmount, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
+import { useSwipeDismiss } from '../composables/useSwipeDismiss';
 import { useAppStore } from '../stores/app';
 import type { BeforeInstallPromptEvent } from '../types';
 import BaseButton from './BaseButton.vue';
 
 const { t } = useI18n();
 const appStore = useAppStore();
+
+const drag = useSwipeDismiss(() => dismiss());
 
 // The deferred prompt event (Chrome/Android)
 let deferredPrompt: BeforeInstallPromptEvent | null = null;

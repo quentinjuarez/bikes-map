@@ -6,10 +6,12 @@
     <Transition name="modal">
       <div
         v-if="open"
+        :style="drag.style"
         class="fixed right-0 bottom-0 left-0 z-2001 flex h-[85dvh] flex-col rounded-t-2xl border-t border-line bg-surface text-fg shadow-sheet md:top-1/2 md:bottom-auto md:left-1/2 md:h-[80dvh] md:w-[640px] md:-translate-x-1/2 md:-translate-y-1/2 md:rounded-2xl md:border md:shadow-pop"
       >
-        <!-- Sticky header -->
-        <div class="flex-none px-6 pt-6">
+        <!-- Sticky header (also the mobile swipe-to-dismiss zone) -->
+        <div v-on="drag.handlers" class="flex-none touch-none px-6 pt-6 md:touch-auto">
+          <div class="mx-auto mb-3 h-1 w-9 rounded-full bg-line md:hidden" aria-hidden="true" />
           <div class="mb-4 flex items-center justify-between">
             <h2 class="text-base font-semibold">
               {{ t('bikeList.title') }}
@@ -109,6 +111,7 @@ import { ref, computed, watch, nextTick, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import type { MapEntity } from '../composables/useBikes';
+import { useSwipeDismiss } from '../composables/useSwipeDismiss';
 
 const { t } = useI18n();
 
@@ -118,6 +121,8 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{ close: [] }>();
+
+const drag = useSwipeDismiss(() => emit('close'));
 
 // ── Virtual list ─────────────────────────────────────────────────────
 
